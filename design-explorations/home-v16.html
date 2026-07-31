@@ -239,13 +239,12 @@
   .csrow { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:0; }
   .csrow + .csrow { margin-top: var(--row-gap); }
 
+  /* the gradient is only ever seen while the cover is loading */
   .csimg { aspect-ratio:4/3; overflow:hidden; display:flex; align-items:center; justify-content:center;
            background: linear-gradient(150deg,#eceaf1 0%,#e3e0ea 55%,#dcd9e6 100%);
            text-decoration:none; }
   .csimg img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .45s ease; }
   .csrow:hover .csimg img { transform: scale(1.035); }
-  .csimg .ph { color:#6b6480; font-size:12.5px; text-align:center; line-height:1.8; padding:0 24px; }
-  .csimg .ph b { display:block; color: var(--plum-700); font-size:14px; margin-bottom:7px; font-weight:600; }
 
   .csrow:nth-child(odd)  .csimg  { border-radius: 0 var(--r-card) var(--r-card) 0; }
   /* outer padding pulled in from 146px to make room for three metrics across */
@@ -495,7 +494,7 @@
       </div>
 
       <div class="csrow">
-        <a class="csimg" href="#" tabindex="-1" aria-hidden="true"><div class="ph"><b>Agentic AI cover image</b>images/agentic-ai/cover.png<br>4:3 — needs making</div></a>
+        <a class="csimg" href="#" tabindex="-1" aria-hidden="true"><img src="../images/agentic-ai/cover.png" alt=""></a>
         <div class="csbody">
           <h3><a href="#">Agentic Workflow Transformation</a></h3>
           <p>Defining the UX paradigm for proactive, non-deterministic AI environments.</p>

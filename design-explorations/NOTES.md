@@ -16,13 +16,12 @@ the spec**, using `home-v16.html` as the reference for tokens and components, th
 
 ## Still open
 
-- **Capacity cover: done.** `images/capacity/cover.png` — the light, plum-tinted 4:3 crop
-  whose dot ground matches the hero. A dark-plum 2× alternate is kept beside it as
-  `cover-dark.png`. Note the live one is 1200×900, which is only 1× at the desktop display
-  size (~590 CSS px per column); a 2× export would be sharper on retina.
-- **Agentic AI cover still doesn't exist** — that row still ships a tinted placeholder.
-  The files in `Agentic AI Case Study/` are full annotated presentation slides, not covers,
-  and there's no 4:3 crop of them that isn't a mess.
+- ~~Case study covers~~ **done.** Both are in and both placeholders are gone:
+  `images/capacity/cover.png` and `images/agentic-ai/cover.png`, each 2400×1800 (2× at the
+  desktop column width) on the plum-tinted dot ground that matches the hero. Sources live
+  in `Home page/`, which is gitignored — the copies under `images/` are the tracked ones.
+  A superseded dark-plum variant sits at `images/capacity/cover-dark.png`; delete it if
+  it's not wanted.
 - **Copy lengths are lopsided.** The Agentic description is one line against Capacity's
   three, so the two rows sit at visibly different heights. A copy fix, not a layout one.
 - **The two contact buttons are identical white outlines**, so the page's primary action
