@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v3 — Purple/indigo palette, bold blocks, quote treatments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  .chrome-head { background: #1b2337; color: #fff; padding: 26px 32px; position: sticky; top: 0; z-index: 50; }
+  .chrome-head h1 { font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .band-label { padding: 26px 32px 12px; }
+  .band-label .name { font-size: 15px; font-weight: 600; color: #1b2337; }
+  .band-label .note { font-size: 13px; color: #6b7683; margin-top: 3px; }
+
+  .wrap { padding: 0 32px 44px; }
+  .page { max-width: 1100px; margin: 0 auto; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 14px 38px rgba(0,0,0,.16); }
+
+  /* ═══════════ TOKENS — sampled from Ramya's decks ═══════════ */
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --font-body: Inter, -apple-system, sans-serif;
+
+    --paper:       #ffffff;
+    --paper-alt:   #f7f7f5;   /* her warm gray canvas */
+    --ink-head:    #1b2337;   /* her serif headline navy */
+    --ink-body:    #4a5468;
+    --ink-muted:   #78818f;
+    --ink-faint:   #9aa4b0;
+    --rule:        #e2e5ea;
+
+    --plum-900:    #241d3d;   /* darkest of her ramp */
+    --plum-800:    #2e2350;
+    --plum-600:    #4a2f66;
+    --plum-400:    #7d6795;
+    --accent:      #6b4d9e;   /* links, eyebrows, metrics */
+    --accent-soft: #efeaf7;
+    --amber:       #f0c463;   /* her sticky-note yellow */
+    --amber-soft:  #fdf3d8;
+
+    --measure: 68ch;
+    background: var(--paper); color: var(--ink-body); font-family: var(--font-body);
+  }
+  .d .inner { max-width: 960px; margin: 0 auto; padding: 0 56px; }
+
+  /* dotted texture — carried over from her deck backgrounds */
+  .dots {
+    background-image: radial-gradient(circle, #d3d6dd 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .d nav { display:flex; align-items:center; justify-content:space-between;
+           padding: 20px 56px; border-bottom: 1px solid var(--rule); background: var(--paper); }
+  .d nav .wordmark { font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--ink-head); }
+  .d nav .links { display: flex; gap: 26px; align-items:center; }
+  .d nav a { font-size: 13.5px; color: var(--ink-muted); text-decoration: none; }
+  .d nav a:hover { color: var(--accent); }
+  .d nav .cta { background: var(--plum-900); color:#fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; }
+
+  .d .eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+                color: var(--accent); margin-bottom: 18px; }
+  .d h1 { font-family: var(--font-head); font-size: clamp(2.5rem, 5.4vw, 4.1rem); line-height: 1.05;
+          letter-spacing: -.014em; font-weight: 600; color: var(--ink-head); }
+  .d .sub { font-size: 1.16rem; line-height: 1.6; color: var(--ink-muted); max-width: 58ch; margin-top: 22px; }
+
+  .d h2 { font-family: var(--font-head); font-size: clamp(1.6rem, 3vw, 2.15rem); font-weight: 600;
+          letter-spacing: -.012em; line-height: 1.18; color: var(--ink-head); margin-bottom: 18px; }
+  .d p.prose { font-size: 1.055rem; line-height: 1.68; max-width: var(--measure); margin-bottom: 17px; }
+
+  .d .sectionlabel { font-size: 11.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+                     color: var(--ink-faint); margin-bottom: 24px; }
+
+  /* ═══ BOLD BLOCKS ═══ */
+  .block { padding: 82px 56px; }
+  .block-dark  { background: var(--plum-900); color: #cdc6dd; }
+  .block-dark h2, .block-dark .n { color: #fff; }
+  .block-plum  { background: var(--plum-600); color: #ddd3e6; }
+  .block-plum h2 { color: #fff; }
+  .block-amber { background: var(--amber); color: #3a2f14; }
+  .block-amber h2 { color: #241d3d; }
+  .block-alt   { background: var(--paper-alt); }
+  .block .binner { max-width: 960px; margin: 0 auto; }
+
+  /* stat tiles on dark */
+  .stattiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .stattiles .n { font-family: var(--font-head); font-size: 3.2rem; font-weight: 700; line-height: 1; }
+  .stattiles .k { font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+                  color: var(--amber); margin: 14px 0 9px; }
+  .stattiles .t { font-size: .95rem; line-height: 1.6; opacity: .82; }
+
+  /* cards */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .card { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; overflow:hidden;
+          transition: .18s; cursor: pointer; }
+  .card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 26px rgba(36,29,61,.10); }
+  .card .thumb { height: 152px; background: linear-gradient(135deg, #241d3d 0%, #4a2f66 55%, #6b4d9e 100%);
+                 position: relative; overflow: hidden; }
+  .card .thumb::after { content:''; position:absolute; right:-30px; top:-40px; width:180px; height:180px;
+                        border-radius:50%; background: rgba(255,255,255,.07); }
+  .card .cbody { padding: 26px 26px 30px; }
+  .card .stat { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+                color: var(--accent); display: block; margin-bottom: 12px; }
+  .card h3 { font-family: var(--font-head); font-size: 1.38rem; font-weight: 600; color: var(--ink-head);
+             line-height: 1.24; margin-bottom: 11px; letter-spacing: -.01em; }
+  .card p { font-size: .96rem; line-height: 1.6; color: var(--ink-muted); margin-bottom: 18px; }
+  .card .go { font-size: 13.5px; color: var(--accent); font-weight: 600; }
+
+  /* philosophy on amber */
+  .principles { display: grid; grid-template-columns: repeat(3,1fr); gap: 34px; }
+  .principles .p-n { font-family: var(--font-head); font-size: 1.6rem; font-weight: 700; color: #241d3d; opacity:.35; }
+  .principles h4 { font-family: var(--font-head); font-size: 1.22rem; font-weight: 600; color: #241d3d;
+                   margin: 8px 0 10px; line-height: 1.3; }
+  .principles p { font-size: .95rem; line-height: 1.62; color: #4a3d1c; }
+
+  /* ═══ QUOTE TREATMENTS ═══ */
+  .q-left {
+    max-width: var(--measure); margin: 6px 0;
+    border-left: 3px solid var(--accent); padding: 6px 0 6px 26px;
+  }
+  .q-left .t { font-family: var(--font-head); font-size: 1.72rem; line-height: 1.34; font-weight: 600;
+               letter-spacing: -.012em; color: var(--ink-head); }
+  .q-left .a { font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin-top: 14px; }
+
+  .q-band { background: var(--plum-900); padding: 74px 56px; }
+  .q-band .qi { max-width: 780px; margin: 0 auto; text-align: center; }
+  .q-band .t { font-family: var(--font-head); font-style: italic; font-size: clamp(1.7rem, 3.6vw, 2.5rem);
+               line-height: 1.32; font-weight: 400; color: #fff; }
+  .q-band .a { font-size: 12px; letter-spacing: .13em; text-transform: uppercase; color: var(--amber); margin-top: 22px; }
+
+  .q-amber { background: var(--amber-soft); border-left: 3px solid var(--amber); padding: 30px 32px;
+             max-width: var(--measure); margin: 6px 0; }
+  .q-amber .t { font-family: var(--font-head); font-size: 1.5rem; line-height: 1.36; font-weight: 600; color: #241d3d; }
+
+  .qdemo { padding: 44px 56px; }
+  .qdemo .lbl { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+                color: var(--accent); margin-bottom: 18px; }
+  .qdemo .why { font-size: 13px; color: var(--ink-muted); margin-top: 16px; max-width: 62ch; line-height:1.6; }
+  .qdemo hr { border:0; border-top:1px solid var(--rule); margin: 40px 0; }
+
+  @media (max-width: 860px) {
+    .d .inner, .d nav, .block, .q-band, .qdemo { padding-left: 24px; padding-right: 24px; }
+    .stattiles, .cards, .principles { grid-template-columns: 1fr; gap: 28px; }
+    .wrap { padding-left: 12px; padding-right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <h1>v3 — your palette, bolder blocks, and three quote treatments</h1>
+  <p>Purple/indigo + amber sampled from your own decks. Home page first, then the quote options.</p>
+</div>
+
+<!-- ══════════ HOME PAGE ══════════ -->
+<div class="band-label">
+  <div class="name">Home page — bold alternating blocks</div>
+  <div class="note">White hero → dark indigo stats → work cards → amber philosophy → dark footer</div>
+</div>
+<div class="wrap">
+<div class="page d">
+
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="cta">Get in touch</a></span>
+  </nav>
+
+  <!-- hero -->
+  <div class="block dots" style="padding-top:96px;padding-bottom:88px">
+    <div class="binner">
+      <div class="eyebrow">Impact-Driven Design Leadership</div>
+      <h1>People.<br>Strategy.<br>Scale.</h1>
+      <p class="sub">I'm a Director of Product Design who leads design at scale in complex product ecosystems. I build people-first, inclusive design teams that navigate the ambiguity of AI-first product development, turning technology into clear business outcomes.</p>
+    </div>
+  </div>
+
+  <!-- stats on dark indigo -->
+  <div class="block block-dark">
+    <div class="binner">
+      <div class="stattiles">
+        <div><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div><div class="n">10+</div><div class="k">Agentic Workflows</div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- work -->
+  <div class="block">
+    <div class="binner">
+      <div class="sectionlabel">Selected work</div>
+      <div class="cards">
+        <div class="card">
+          <div class="thumb"></div>
+          <div class="cbody">
+            <span class="stat">$1B+ Operational Savings</span>
+            <h3>Transforming Meta's Global Capacity Infra</h3>
+            <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems to keep up with AI-led demand.</p>
+            <span class="go">View case study →</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="thumb"></div>
+          <div class="cbody">
+            <span class="stat">10+ Agentic Workflows</span>
+            <h3>Agentic Workflow Transformation</h3>
+            <p>Defining the UX paradigm for proactive, non-deterministic AI environments.</p>
+            <span class="go">View case study →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- philosophy on amber -->
+  <div class="block block-amber">
+    <div class="binner">
+      <h2 style="margin-bottom:14px">Strong teams. Strong impact.</h2>
+      <p style="max-width:60ch;margin-bottom:44px;line-height:1.65;color:#4a3d1c">Ecosystems are only as strong as the people who build them.</p>
+      <div class="principles">
+        <div><div class="p-n">01</div><h4>People first. Impact follows.</h4><p>Prioritize psychological safety and well-being, and massive business results follow.</p></div>
+        <div><div class="p-n">02</div><h4>Orchestrate systems, don't control pixels.</h4><p>Empower teams to build adaptable frameworks that navigate ambiguity with grace.</p></div>
+        <div><div class="p-n">03</div><h4>Inclusion is not an afterthought.</h4><p>Build it into the structures that already exist, not as a parallel initiative.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- contact / footer -->
+  <div class="block block-dark" style="padding-top:74px;padding-bottom:74px">
+    <div class="binner">
+      <h2 style="margin-bottom:16px">Let's build what's next.</h2>
+      <p style="max-width:56ch;opacity:.82;line-height:1.65;margin-bottom:30px">I'm always open to discussing AI-first product strategy, scaling design orgs, and the future of design.</p>
+      <span style="background:var(--amber);color:#241d3d;padding:12px 22px;border-radius:4px;font-size:14px;font-weight:600;margin-right:12px">Email me</span>
+      <span style="border:1px solid rgba(255,255,255,.28);color:#fff;padding:12px 22px;border-radius:4px;font-size:14px;font-weight:600">LinkedIn</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ══════════ QUOTE TREATMENTS ══════════ -->
+<div class="band-label">
+  <div class="name">Three quote treatments — pick one (or one per purpose)</div>
+  <div class="note">Your note was right: centered text inside left-aligned prose just reads as inconsistent</div>
+</div>
+<div class="wrap">
+<div class="page d">
+  <div class="qdemo">
+
+    <div class="lbl">Option 1 — Left-aligned, accent rule</div>
+    <p class="prose">We ran a three-week design sprint with one central question: what are the jobs people actually do here, regardless of the tools they use today? By the end, 90+ scattered components had collapsed into six coherent product domains.</p>
+    <div class="q-left">
+      <div class="t">Solutions are ephemeral. Jobs are immutable.</div>
+    </div>
+    <p class="prose" style="margin-top:26px">That reframe accomplished three things simultaneously. It defragmented the ecosystem, shifted focus onto real user workflows, and freed the team to design and build in parallel.</p>
+    <p class="why"><b>Why this works:</b> stays on the same left edge as every other line on the page, so your eye never resets. Reads as part of the argument. Quietest option — best if quotes appear often.</p>
+
+    <hr>
+
+    <div class="lbl">Option 2 — Full-bleed dark band (centered, but earned)</div>
+    <p class="prose">We ran a three-week design sprint with one central question: what are the jobs people actually do here, regardless of the tools they use today?</p>
+  </div>
+
+  <div class="q-band">
+    <div class="qi">
+      <div class="t">“Solutions are ephemeral.<br>Jobs are immutable.”</div>
+      <div class="a">Design principle · InfraCloud</div>
+    </div>
+  </div>
+
+  <div class="qdemo">
+    <p class="prose">That reframe defragmented the ecosystem and freed the team to design and build in parallel.</p>
+    <p class="why"><b>Why this works:</b> this is the "different treatment" you asked for. Centering is fine here because the quote breaks the full width of the page and changes background — it's clearly a deliberate stop, not stray centered text. Doubles as one of your bold color blocks. Best used sparingly: one per case study.</p>
+
+    <hr>
+
+    <div class="lbl">Option 3 — Amber callout</div>
+    <p class="prose">Our first product decision was a prioritization strategy: instead of building toward a single monolithic launch, we broke the vision down into the smallest pieces that could unblock the next planning cycle.</p>
+    <div class="q-amber">
+      <div class="t">Be optimistic, but be realistic. Releases must tie to business milestones.</div>
+    </div>
+    <p class="prose" style="margin-top:26px">This clarity gave the team predictability and the permission to defer the rest.</p>
+    <p class="why"><b>Why this works:</b> picks up the amber from your Before/After sticky notes. Good for the "golden rule" type callouts that aren't really quotes — more like principles worth boxing. You have several of these in both case studies.</p>
+
+  </div>
+</div>
+</div>
+
+</body>
+</html>

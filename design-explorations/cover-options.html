@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cover options — Capacity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  .chrome-head { background: #1b2337; color: #fff; padding: 22px 32px; position: sticky; top: 0; z-index: 60; }
+  .chrome-head h1 { font-family: 'Source Serif 4', serif; font-size: 19px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .wrap { padding: 26px 32px 60px; }
+  .page { max-width: 1180px; margin: 0 auto 30px; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 14px 38px rgba(0,0,0,.16); }
+
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff;
+    --ink-head: #1b2337; --ink-body: #4a5468; --ink-muted: #78818f;
+    --plum-900: #241d3d; --plum-700: #35294f;
+    --accent: #57398a; --accent-hover: #452c6f;
+    --r-card: 18px;
+    background: var(--paper); color: var(--ink-body); font-family: Inter, sans-serif;
+    padding: 40px 0 46px;
+  }
+
+  .btn { background: var(--accent); color:#fff; padding:13px 26px; border-radius:999px;
+         font-size:13.5px; font-weight:600; display:inline-block; transition:.16s; text-decoration:none; }
+  .btn:hover { background: var(--accent-hover); }
+
+  /* ── the label strip above each option ───────────────────────────────── */
+  .optlabel { max-width:1180px; margin:0 auto 14px; padding:0 4px; display:flex;
+              align-items:baseline; gap:12px; }
+  .optlabel .k { font-family:'Source Serif 4',serif; font-size:15px; font-weight:700;
+                 color:#1b2337; }
+  .optlabel .n { font-size:12.5px; color:#6b7280; }
+  .optlabel .rec { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+                   color:#57398a; border:1px solid #cfc4e0; border-radius:999px; padding:3px 9px; }
+
+  /* ═══ WORK ROW — matches home-v15 exactly, so covers are judged at true size ═══ */
+  .worklist { max-width: 1180px; margin: 0 auto; }
+  .csrow { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:0; }
+  .csbody { padding-left: 64px; padding-right: clamp(24px,5vw,100px); }
+  .csbody h3 { font-family: var(--font-head); font-size: clamp(1.65rem,2.9vw,2.15rem); font-weight:600;
+               color: var(--ink-head); line-height:1.2; letter-spacing:-.012em; margin-bottom:16px; }
+  .csbody p { font-size:1.03rem; line-height:1.66; color: var(--ink-muted); margin-bottom:32px; max-width:46ch; }
+  .csmetrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
+               gap:24px 20px; margin-bottom:34px; }
+  .csmetrics .v { font-family: var(--font-head); font-size:1.5rem; font-weight:700; line-height:1.05;
+                  color: var(--ink-head); letter-spacing:-.02em; }
+  .csmetrics .v .from { color: var(--ink-head); }
+  .csmetrics .v .arrow { color: var(--ink-muted); font-weight:400; margin:0 5px; }
+  .csmetrics .l { font-size:12.5px; color: var(--ink-muted); margin-top:7px; }
+
+  /* ═══ THE COVER ═══════════════════════════════════════════════════════
+     4:3 box, rounded on the inner edge only — the same geometry .csimg has.
+     The slice is 1408×918 (ratio 1.534), WIDER than the 4:3 frame, so any
+     variant that fills the height must overflow the width. That is the whole
+     reason a left bleed is available at all.                                */
+  .cover { position:relative; aspect-ratio:4/3; overflow:hidden;
+           border-radius: 0 var(--r-card) var(--r-card) 0;
+           background-color: var(--plum-900);
+           background-image:
+             radial-gradient(circle, rgba(255,255,255,.07) 1px, transparent 1px),
+             radial-gradient(ellipse 62% 46% at 46% 44%, rgba(255,255,255,.11), rgba(255,255,255,0) 72%);
+           background-size: 22px 22px, auto;
+           background-repeat: repeat, no-repeat; }
+
+  .cover img { position:absolute; display:block; border-radius:10px;
+               box-shadow: 0 2px 5px rgba(0,0,0,.20), 0 22px 50px rgba(0,0,0,.36); }
+
+  /* Geometry is expressed in % of the 590×442 slot so it survives any width.
+
+     Run-off is to the BOTTOM-RIGHT, never the left. The $XX B numeral and every
+     card title sit hard against the slice's left edge, so a left bleed decapitates
+     them — "$XX B" renders as "B". Running off right instead points the fragment
+     into the page, toward the copy, and keeps the left column whole.
+
+     A — framed:   uniform inset, whole slice visible
+     B — run-off:  plum on left/top/bottom, slice exits the rounded right edge
+     C — deep:     inset top-left only, exits both right and bottom             */
+  .geo-a img { left:5.76%; top:11.50%; width:88.5%; }
+  .geo-b img { left:6.78%; top:5.66%;  width:101.9%; }
+  .geo-c img { left:3.40%; top:4.50%;  width:122.0%; }
+
+  /* Ground variants — geometry held at B so only the ground changes.         */
+  .gr-quiet  { background-image: radial-gradient(circle, rgba(255,255,255,.05) 1px, transparent 1px); }
+  .gr-lifted { background-color: var(--plum-700);
+               background-image:
+                 radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px),
+                 radial-gradient(ellipse 66% 50% at 46% 44%, rgba(255,255,255,.17), rgba(255,255,255,0) 74%); }
+
+  /* ── bare comparison tiles, still at true 590px ──────────────────────── */
+  .tiles { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:0 0; }
+  .tiles .cell { padding:0; }
+  .tiles .cap { font-size:12.5px; color:#6b7280; padding:10px 4px 26px; }
+  .tiles .cap b { color:#1b2337; font-weight:600; }
+  .tiles .cover { border-radius: var(--r-card); }
+
+  .note { max-width:1180px; margin:0 auto; padding:26px 4px 0; font-size:13.5px; line-height:1.7;
+          color:#4a5468; border-top:1px solid #e2e5ea; }
+  .note b { color:#1b2337; }
+  .sechead { max-width:1180px; margin:0 auto; padding:0 4px 18px; }
+  .sechead h2 { font-family:'Source Serif 4',serif; font-size:20px; color:#1b2337; font-weight:700; }
+  .sechead p { font-size:13.5px; color:#78818f; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <h1>Capacity cover — options</h1>
+  <p>Slice: Landing Page artboard 397:2, cropped y 642–1560 (1408×918). Every cover below renders at
+     its true 590×442 — judge it at this size, not zoomed.</p>
+</div>
+
+<div class="wrap">
+
+  <!-- ══════════ SECTION 1 — BLEED DEPTH, IN SITU ══════════ -->
+  <div class="page"><div class="d">
+    <div class="sechead">
+      <h2>1 · Bleed depth</h2>
+      <p>Shown in the real case study row so the cover is judged against the copy beside it.
+         Ground is held constant; only the slice's geometry changes.</p>
+    </div>
+
+    <div class="optlabel"><span class="k">A · Framed</span>
+      <span class="n">inset on all four sides — plum reads as a mat</span></div>
+    <div class="worklist"><div class="csrow">
+      <div class="cover geo-a"><img src="assets/capacity-slice.png" alt=""></div>
+      <div class="csbody">
+        <h3>Transforming Meta's Global Capacity Infra</h3>
+        <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems to keep up with the AI-led capacity demand.</p>
+        <div class="csmetrics">
+          <div><div class="v"><span class="from">0</span><span class="arrow">→</span>$1B+</div><div class="l">Savings</div></div>
+          <div><div class="v"><span class="from">10</span><span class="arrow">→</span>25</div><div class="l">Designers</div></div>
+          <div><div class="v">10+ GW</div><div class="l">Capacity</div></div>
+        </div>
+        <a href="#" class="btn">View case study →</a>
+      </div>
+    </div></div>
+  </div></div>
+
+  <div class="page"><div class="d">
+    <div class="optlabel"><span class="k">B · Run-off</span>
+      <span class="n">plum on left / top / bottom, slice exits the rounded right edge</span>
+      <span class="rec">recommended</span></div>
+    <div class="worklist"><div class="csrow">
+      <div class="cover geo-b"><img src="assets/capacity-slice.png" alt=""></div>
+      <div class="csbody">
+        <h3>Transforming Meta's Global Capacity Infra</h3>
+        <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems to keep up with the AI-led capacity demand.</p>
+        <div class="csmetrics">
+          <div><div class="v"><span class="from">0</span><span class="arrow">→</span>$1B+</div><div class="l">Savings</div></div>
+          <div><div class="v"><span class="from">10</span><span class="arrow">→</span>25</div><div class="l">Designers</div></div>
+          <div><div class="v">10+ GW</div><div class="l">Capacity</div></div>
+        </div>
+        <a href="#" class="btn">View case study →</a>
+      </div>
+    </div></div>
+  </div></div>
+
+  <div class="page"><div class="d">
+    <div class="optlabel"><span class="k">C · Deep run-off</span>
+      <span class="n">inset top-left only — exits right and bottom, plum survives as a corner</span></div>
+    <div class="worklist"><div class="csrow">
+      <div class="cover geo-c"><img src="assets/capacity-slice.png" alt=""></div>
+      <div class="csbody">
+        <h3>Transforming Meta's Global Capacity Infra</h3>
+        <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems to keep up with the AI-led capacity demand.</p>
+        <div class="csmetrics">
+          <div><div class="v"><span class="from">0</span><span class="arrow">→</span>$1B+</div><div class="l">Savings</div></div>
+          <div><div class="v"><span class="from">10</span><span class="arrow">→</span>25</div><div class="l">Designers</div></div>
+          <div><div class="v">10+ GW</div><div class="l">Capacity</div></div>
+        </div>
+        <a href="#" class="btn">View case study →</a>
+      </div>
+    </div></div>
+  </div></div>
+
+  <!-- ══════════ SECTION 2 — GROUND CONTRAST ══════════ -->
+  <div class="page"><div class="d">
+    <div class="sechead">
+      <h2>2 · Ground contrast</h2>
+      <p>Geometry held at B. The question is how hard the white cards separate from the plum —
+         too little and they glare, too much and the slice looks pasted on.</p>
+    </div>
+    <div class="tiles">
+      <div class="cell">
+        <div class="cover geo-b gr-quiet"><img src="assets/capacity-slice.png" alt=""></div>
+        <div class="cap"><b>Quiet</b> — flat #241d3d, dots at .05, no pool. Maximum separation.</div>
+      </div>
+      <div class="cell">
+        <div class="cover geo-b"><img src="assets/capacity-slice.png" alt=""></div>
+        <div class="cap"><b>Pooled</b> — dots .07 over a soft light pool. Echoes the hero.</div>
+      </div>
+      <div class="cell">
+        <div class="cover geo-b gr-lifted"><img src="assets/capacity-slice.png" alt=""></div>
+        <div class="cap"><b>Lifted</b> — #35294f base, stronger pool. Warmer, less contrast.</div>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>What to look for.</b> At 590px the <b>$XX B</b> numeral, all three card titles and the
+      chart's three lines hold. The table rows below become texture — that is expected and fine.
+      The thing to actually judge is whether the slice reads as <i>a fragment of something larger</i>
+      (which is the claim) or as <i>a screenshot someone pasted on a purple rectangle</i>.<br><br>
+      <b>Why the run-off goes right, not left.</b> The first mock ran the slice off the left page
+      edge. It failed: <b>$XX B</b> and every card title sit hard against the slice's left edge, so
+      the numeral rendered as "B" and the titles as "…ty Planning Timeline". Running off the
+      bottom-right instead keeps the left column whole and points the fragment into the page.<br><br>
+      <b>Known gap.</b> <code>.csimg</code> does not currently bleed off the page edge in v15 —
+      <code>.worklist</code> is a plain centred 1180px with no negative margin, so these render as
+      clean boxes.
+    </div>
+  </div></div>
+
+</div>
+</body>
+</html>

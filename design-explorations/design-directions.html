@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Three Design Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: Inter, -apple-system, sans-serif; background: #e8e8e6; }
+
+  /* ── Chrome around the specimens ── */
+  .chrome-head {
+    background: #1b1b1b; color: #fff; padding: 28px 32px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .chrome-head h1 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+  .chrome-head p { font-size: 13px; color: #a0a0a0; margin-top: 5px; }
+
+  .band-label {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    padding: 22px 32px 14px;
+    background: #e8e8e6;
+  }
+  .band-label .tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: #1b1b1b; color: #fff; padding: 5px 10px; border-radius: 3px;
+  }
+  .band-label .name { font-size: 16px; font-weight: 600; color: #1b1b1b; }
+  .band-label .note { font-size: 13px; color: #6a6a68; }
+  .band-label .specs {
+    font-size: 11.5px; color: #6a6a68; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    width: 100%; margin-top: 2px;
+  }
+
+  .specimen { padding: 0 32px 46px; }
+  .page {
+    max-width: 1080px; margin: 0 auto;
+    border-radius: 6px; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 12px 34px rgba(0,0,0,.13);
+  }
+
+  /* ══════════════════════════════════════════════════
+     Shared skeleton — each direction only overrides tokens
+     ══════════════════════════════════════════════════ */
+  .d {
+    --measure: 68ch;
+    background: var(--paper);
+    color: var(--ink-body);
+    font-family: var(--font-body);
+  }
+  .d .inner { max-width: 940px; margin: 0 auto; padding: 0 56px; }
+
+  .d nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 56px; border-bottom: 1px solid var(--rule);
+  }
+  .d nav .wordmark {
+    font-family: var(--font-head); font-weight: 700; font-size: 15px;
+    letter-spacing: -.01em; color: var(--ink-head);
+  }
+  .d nav .links { display: flex; gap: 26px; }
+  .d nav a { font-size: 13.5px; color: var(--ink-muted); text-decoration: none; }
+  .d nav a:hover { color: var(--accent); }
+
+  .d .hero { padding: 74px 0 44px; }
+  .d .eyebrow {
+    font-size: 11.5px; font-weight: 600; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 18px;
+  }
+  .d h1 {
+    font-family: var(--font-head);
+    font-size: clamp(2.4rem, 5.2vw, 3.9rem);
+    line-height: 1.04; letter-spacing: var(--head-track);
+    font-weight: var(--head-weight); color: var(--ink-head);
+    max-width: 20ch;
+  }
+  .d .sub {
+    font-size: 1.16rem; line-height: 1.55; color: var(--ink-muted);
+    max-width: 56ch; margin-top: 22px;
+  }
+
+  /* metadata block */
+  .d .meta {
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+    padding: 26px 0; margin: 46px 0 0;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px;
+  }
+  .d .meta .k {
+    font-size: 10.5px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-faint); margin-bottom: 7px;
+  }
+  .d .meta .v { font-size: 13.5px; line-height: 1.45; color: var(--ink-head); }
+
+  /* body section */
+  .d section.body { padding: 54px 0 0; }
+  .d h2 {
+    font-family: var(--font-head);
+    font-size: clamp(1.5rem, 2.9vw, 2.05rem);
+    font-weight: var(--head-weight); letter-spacing: var(--head-track);
+    line-height: 1.18; color: var(--ink-head); margin-bottom: 18px;
+  }
+  .d p.prose {
+    font-size: 1.055rem; line-height: 1.68; max-width: var(--measure);
+    margin-bottom: 17px; color: var(--ink-body);
+  }
+  .d .epigraph {
+    font-style: italic; font-size: 1.09rem; line-height: 1.55;
+    color: var(--ink-muted); border-left: 2px solid var(--accent);
+    padding-left: 20px; margin: 0 0 26px; max-width: 58ch;
+  }
+
+  /* pull quote */
+  .d .pull {
+    font-family: var(--font-head);
+    font-size: clamp(1.45rem, 3.1vw, 2.05rem);
+    line-height: 1.28; letter-spacing: var(--head-track);
+    font-weight: var(--head-weight); color: var(--ink-head);
+    text-align: center; max-width: 22ch; margin: 52px auto;
+  }
+  .d .pull .mark { color: var(--accent); }
+
+  /* metrics */
+  .d .metrics {
+    background: var(--paper-alt); margin-top: 56px; padding: 52px 56px;
+    border-top: 1px solid var(--rule);
+  }
+  .d .metrics .grid {
+    max-width: 940px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px;
+  }
+  .d .metrics .n {
+    font-family: var(--font-head);
+    font-size: clamp(1.9rem, 4vw, 2.9rem); line-height: 1;
+    font-weight: 700; letter-spacing: -.025em; color: var(--accent-num);
+  }
+  .d .metrics .l {
+    font-size: 12.5px; line-height: 1.4; color: var(--ink-muted); margin-top: 11px;
+  }
+
+  /* ══════════════════════════════════════════════════
+     DIRECTION A — Faithful
+     ══════════════════════════════════════════════════ */
+  .dir-a {
+    --font-head: Inter, sans-serif;
+    --font-body: Inter, sans-serif;
+    --head-weight: 700;
+    --head-track: -.028em;
+    --paper: #fefeff;
+    --paper-alt: #f7f7f7;
+    --ink-head: #222;
+    --ink-body: #515151;
+    --ink-muted: #7e7e7e;
+    --ink-faint: #a2a2a2;
+    --rule: #e1e1e1;
+    --accent: #d4933b;
+    --accent-num: #222;
+  }
+
+  /* ══════════════════════════════════════════════════
+     DIRECTION B — Editorial
+     ══════════════════════════════════════════════════ */
+  .dir-b {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --font-body: Inter, sans-serif;
+    --head-weight: 600;
+    --head-track: -.012em;
+    --paper: #fffdf9;
+    --paper-alt: #f6f1e8;
+    --ink-head: #1c1a17;
+    --ink-body: #4a4741;
+    --ink-muted: #7c776e;
+    --ink-faint: #a49d92;
+    --rule: #e5ded1;
+    --accent: #b0762a;
+    --accent-num: #b0762a;
+  }
+  .dir-b .pull { font-style: italic; }
+
+  /* ══════════════════════════════════════════════════
+     DIRECTION C — Technical
+     ══════════════════════════════════════════════════ */
+  .dir-c {
+    --font-head: Outfit, sans-serif;
+    --font-body: Inter, sans-serif;
+    --head-weight: 600;
+    --head-track: -.022em;
+    --paper: #ffffff;
+    --paper-alt: #f4f6f8;
+    --ink-head: #101418;
+    --ink-body: #46505c;
+    --ink-muted: #6b7683;
+    --ink-faint: #9aa4b0;
+    --rule: #e3e8ed;
+    --accent: #0f6b6b;
+    --accent-num: #0f6b6b;
+  }
+
+  @media (max-width: 820px) {
+    .d .inner, .d nav, .d .metrics { padding-left: 26px; padding-right: 26px; }
+    .d .meta, .d .metrics .grid { grid-template-columns: repeat(2, 1fr); }
+    .specimen { padding-left: 12px; padding-right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <h1>Three design directions — your Capacity case study, rendered for real</h1>
+  <p>Same layout and structure in all three. Only the type and color tokens change. Scroll and compare.</p>
+</div>
+
+<!-- ══════════ A ══════════ -->
+<div class="band-label">
+  <span class="tag">A</span>
+  <span class="name">Faithful</span>
+  <span class="note">Closest to Mitchell's site — measured values, rebuilt</span>
+  <span class="specs">Inter 700 · #222 heads / #515151 body · gold #d4933b · paper #fefeff / alt #f7f7f7</span>
+</div>
+<div class="specimen">
+<div class="page d dir-a">
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#">Contact</a></span>
+  </nav>
+  <div class="inner">
+    <div class="hero">
+      <div class="eyebrow">Case Study · Infrastructure</div>
+      <h1>Scaling Meta's Global Capacity Infra</h1>
+      <p class="sub">Architecting the vision, product strategy, and cross-functional teams that enabled $1B+ in capacity savings.</p>
+    </div>
+    <div class="meta">
+      <div><div class="k">Role</div><div class="v">Design Director</div></div>
+      <div><div class="k">Team</div><div class="v">10 designers across PM, UXR, Eng, Data Science</div></div>
+      <div><div class="k">Timeframe</div><div class="v">2023 – present</div></div>
+      <div><div class="k">Domain</div><div class="v">Infra — Capacity Planning</div></div>
+    </div>
+    <section class="body">
+      <h2>The Catalyst</h2>
+      <p class="epigraph">It's 2023. The CEO asks how much it costs to run Instagram. Nobody in the room has an accurate answer.</p>
+      <p class="prose">Meta spends billions a year on capacity — storage, compute, and GPUs for AI training. Until that moment, no one could accurately answer who ordered it, when, or for what. The math lived in spreadsheets. Different teams had different spreadsheets. Some of them disagreed.</p>
+      <p class="prose">The CEO mandate landed weeks later: 95% of Meta's fleet must be on capacity contracts, every dollar attributed to a product, operating on a quarterly cycle the CEO would review. Billions of dollars of capacity, moving through email attachments.</p>
+      <div class="pull"><span class="mark">“</span>Solutions are ephemeral. Jobs are immutable.<span class="mark">”</span></div>
+    </section>
+  </div>
+  <div class="metrics"><div class="grid">
+    <div><div class="n">0→1</div><div class="l">under 6 months</div></div>
+    <div><div class="n">$1B+</div><div class="l">operational savings</div></div>
+    <div><div class="n">10+ GW</div><div class="l">capacity tracked</div></div>
+    <div><div class="n">10→25</div><div class="l">designers</div></div>
+  </div></div>
+</div>
+</div>
+
+<!-- ══════════ B ══════════ -->
+<div class="band-label">
+  <span class="tag">B</span>
+  <span class="name">Editorial</span>
+  <span class="note">Serif headlines, warm paper — leans into long-form storytelling</span>
+  <span class="specs">Source Serif 4 heads / Inter body · warm neutrals · amber #b0762a · paper #fffdf9 / alt #f6f1e8</span>
+</div>
+<div class="specimen">
+<div class="page d dir-b">
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#">Contact</a></span>
+  </nav>
+  <div class="inner">
+    <div class="hero">
+      <div class="eyebrow">Case Study · Infrastructure</div>
+      <h1>Scaling Meta's Global Capacity Infra</h1>
+      <p class="sub">Architecting the vision, product strategy, and cross-functional teams that enabled $1B+ in capacity savings.</p>
+    </div>
+    <div class="meta">
+      <div><div class="k">Role</div><div class="v">Design Director</div></div>
+      <div><div class="k">Team</div><div class="v">10 designers across PM, UXR, Eng, Data Science</div></div>
+      <div><div class="k">Timeframe</div><div class="v">2023 – present</div></div>
+      <div><div class="k">Domain</div><div class="v">Infra — Capacity Planning</div></div>
+    </div>
+    <section class="body">
+      <h2>The Catalyst</h2>
+      <p class="epigraph">It's 2023. The CEO asks how much it costs to run Instagram. Nobody in the room has an accurate answer.</p>
+      <p class="prose">Meta spends billions a year on capacity — storage, compute, and GPUs for AI training. Until that moment, no one could accurately answer who ordered it, when, or for what. The math lived in spreadsheets. Different teams had different spreadsheets. Some of them disagreed.</p>
+      <p class="prose">The CEO mandate landed weeks later: 95% of Meta's fleet must be on capacity contracts, every dollar attributed to a product, operating on a quarterly cycle the CEO would review. Billions of dollars of capacity, moving through email attachments.</p>
+      <div class="pull"><span class="mark">“</span>Solutions are ephemeral. Jobs are immutable.<span class="mark">”</span></div>
+    </section>
+  </div>
+  <div class="metrics"><div class="grid">
+    <div><div class="n">0→1</div><div class="l">under 6 months</div></div>
+    <div><div class="n">$1B+</div><div class="l">operational savings</div></div>
+    <div><div class="n">10+ GW</div><div class="l">capacity tracked</div></div>
+    <div><div class="n">10→25</div><div class="l">designers</div></div>
+  </div></div>
+</div>
+</div>
+
+<!-- ══════════ C ══════════ -->
+<div class="band-label">
+  <span class="tag">C</span>
+  <span class="name">Technical</span>
+  <span class="note">Cooler, higher contrast — reads as infrastructure and AI, not fintech</span>
+  <span class="specs">Outfit heads / Inter body · cool grays · teal #0f6b6b · paper #ffffff / alt #f4f6f8</span>
+</div>
+<div class="specimen">
+<div class="page d dir-c">
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#">Contact</a></span>
+  </nav>
+  <div class="inner">
+    <div class="hero">
+      <div class="eyebrow">Case Study · Infrastructure</div>
+      <h1>Scaling Meta's Global Capacity Infra</h1>
+      <p class="sub">Architecting the vision, product strategy, and cross-functional teams that enabled $1B+ in capacity savings.</p>
+    </div>
+    <div class="meta">
+      <div><div class="k">Role</div><div class="v">Design Director</div></div>
+      <div><div class="k">Team</div><div class="v">10 designers across PM, UXR, Eng, Data Science</div></div>
+      <div><div class="k">Timeframe</div><div class="v">2023 – present</div></div>
+      <div><div class="k">Domain</div><div class="v">Infra — Capacity Planning</div></div>
+    </div>
+    <section class="body">
+      <h2>The Catalyst</h2>
+      <p class="epigraph">It's 2023. The CEO asks how much it costs to run Instagram. Nobody in the room has an accurate answer.</p>
+      <p class="prose">Meta spends billions a year on capacity — storage, compute, and GPUs for AI training. Until that moment, no one could accurately answer who ordered it, when, or for what. The math lived in spreadsheets. Different teams had different spreadsheets. Some of them disagreed.</p>
+      <p class="prose">The CEO mandate landed weeks later: 95% of Meta's fleet must be on capacity contracts, every dollar attributed to a product, operating on a quarterly cycle the CEO would review. Billions of dollars of capacity, moving through email attachments.</p>
+      <div class="pull"><span class="mark">“</span>Solutions are ephemeral. Jobs are immutable.<span class="mark">”</span></div>
+    </section>
+  </div>
+  <div class="metrics"><div class="grid">
+    <div><div class="n">0→1</div><div class="l">under 6 months</div></div>
+    <div><div class="n">$1B+</div><div class="l">operational savings</div></div>
+    <div><div class="n">10+ GW</div><div class="l">capacity tracked</div></div>
+    <div><div class="n">10→25</div><div class="l">designers</div></div>
+  </div></div>
+</div>
+</div>
+
+</body>
+</html>

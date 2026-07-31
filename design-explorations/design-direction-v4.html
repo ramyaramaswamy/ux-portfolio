@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v4 — amber as accent only, philosophy block options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  .chrome-head { background: #1b2337; color: #fff; padding: 26px 32px; position: sticky; top: 0; z-index: 50; }
+  .chrome-head h1 { font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .band-label { padding: 26px 32px 12px; }
+  .band-label .name { font-size: 15px; font-weight: 600; color: #1b2337; }
+  .band-label .note { font-size: 13px; color: #6b7683; margin-top: 3px; }
+  .band-label .rec { display:inline-block; background:#6b4d9e; color:#fff; font-size:10.5px; font-weight:700;
+                     letter-spacing:.09em; text-transform:uppercase; padding:3px 8px; border-radius:3px; margin-left:8px; }
+
+  .wrap { padding: 0 32px 40px; }
+  .page { max-width: 1100px; margin: 0 auto; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 14px 38px rgba(0,0,0,.16); }
+
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff;  --paper-alt: #f7f7f5;
+    --ink-head: #1b2337; --ink-body: #4a5468; --ink-muted: #78818f; --ink-faint: #9aa4b0;
+    --rule: #e2e5ea;
+    --plum-900: #241d3d; --plum-600: #4a2f66; --plum-400: #7d6795;
+    --accent: #6b4d9e; --amber: #f0c463;
+    --measure: 68ch;
+    background: var(--paper); color: var(--ink-body); font-family: Inter, sans-serif;
+  }
+  .dots { background-image: radial-gradient(circle, #d3d6dd 1px, transparent 1px); background-size: 22px 22px; }
+
+  .d nav { display:flex; align-items:center; justify-content:space-between;
+           padding: 20px 56px; border-bottom: 1px solid var(--rule); background: var(--paper); }
+  .d nav .wordmark { font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--ink-head); }
+  .d nav .links { display: flex; gap: 26px; align-items:center; }
+  .d nav a { font-size: 13.5px; color: var(--ink-muted); text-decoration: none; }
+  .d nav .cta { background: var(--amber); color:#241d3d; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight:600; }
+
+  .d .eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+                color: var(--accent); margin-bottom: 18px; }
+  .d h1 { font-family: var(--font-head); font-size: clamp(2.5rem, 5.4vw, 4.1rem); line-height: 1.05;
+          letter-spacing: -.014em; font-weight: 600; color: var(--ink-head); }
+  .d .sub { font-size: 1.16rem; line-height: 1.6; color: var(--ink-muted); max-width: 58ch; margin-top: 22px; }
+  .d h2 { font-family: var(--font-head); font-size: clamp(1.6rem, 3vw, 2.15rem); font-weight: 600;
+          letter-spacing: -.012em; line-height: 1.18; color: var(--ink-head); margin-bottom: 14px; }
+  .d .sectionlabel { font-size: 11.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+                     color: var(--ink-faint); margin-bottom: 24px; }
+
+  .block { padding: 80px 56px; }
+  .block .binner { max-width: 960px; margin: 0 auto; }
+  .block-dark { background: var(--plum-900); color: #cdc6dd; }
+  .block-dark h2 { color: #fff; }
+
+  .stattiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .stattiles .n { font-family: var(--font-head); font-size: 3.2rem; font-weight: 700; line-height: 1; color:#fff; }
+  .stattiles .k { font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+                  color: var(--amber); margin: 14px 0 9px; }
+  .stattiles .t { font-size: .95rem; line-height: 1.6; opacity: .82; }
+
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .card { background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; overflow:hidden; transition:.18s; }
+  .card:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 26px rgba(36,29,61,.10); }
+  .card .thumb { height: 148px; background: linear-gradient(135deg,#241d3d 0%,#4a2f66 55%,#6b4d9e 100%); position:relative; overflow:hidden; }
+  .card .thumb::after { content:''; position:absolute; right:-30px; top:-40px; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,.07); }
+  .card .cbody { padding: 26px 26px 30px; }
+  .card .stat { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display:block; margin-bottom: 12px; }
+  .card h3 { font-family: var(--font-head); font-size: 1.38rem; font-weight: 600; color: var(--ink-head); line-height:1.24; margin-bottom: 11px; }
+  .card p { font-size: .96rem; line-height: 1.6; color: var(--ink-muted); margin-bottom: 18px; }
+  .card .go { font-size: 13.5px; color: var(--accent); font-weight: 600; }
+
+  /* buttons — amber survives here */
+  .btn-amber { background: var(--amber); color:#241d3d; padding: 13px 24px; border-radius: 4px;
+               font-size: 14px; font-weight: 700; display:inline-block; margin-right: 12px; }
+  .btn-ghost { border: 1px solid rgba(255,255,255,.28); color:#fff; padding: 12px 23px; border-radius: 4px;
+               font-size: 14px; font-weight: 600; display:inline-block; }
+
+  /* ═══ PHILOSOPHY BLOCK VARIANTS ═══ */
+  .principles { display: grid; grid-template-columns: repeat(3,1fr); gap: 34px; margin-top: 42px; }
+  .principles .p-n { font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; opacity:.42; }
+  .principles h4 { font-family: var(--font-head); font-size: 1.2rem; font-weight: 600; margin: 8px 0 10px; line-height: 1.3; }
+  .principles p { font-size: .94rem; line-height: 1.62; }
+
+  /* A — mid purple */
+  .ph-a { background: var(--plum-600); color:#ded4e8; }
+  .ph-a h2, .ph-a h4, .ph-a .p-n { color:#fff; }
+  .ph-a .lead { color:#c9bad8; }
+  .ph-a .p-n { color: var(--amber); opacity:.85; }
+
+  /* B — warm gray + dots */
+  .ph-b { background: var(--paper-alt); color: var(--ink-body); }
+  .ph-b h2, .ph-b h4 { color: var(--ink-head); }
+  .ph-b .p-n { color: var(--accent); opacity:.55; }
+  .ph-b .lead { color: var(--ink-muted); }
+
+  /* C — near-black, amber numerals */
+  .ph-c { background: #14121f; color:#b8b2c6; }
+  .ph-c h2, .ph-c h4 { color:#fff; }
+  .ph-c .p-n { color: var(--amber); opacity:.9; }
+  .ph-c .lead { color:#9a93ab; }
+  .ph-c .principles > div { border-top: 1px solid rgba(255,255,255,.13); padding-top: 20px; }
+
+  .lead { max-width: 58ch; line-height: 1.65; font-size: 1.02rem; }
+
+  @media (max-width: 860px) {
+    .d nav, .block { padding-left: 24px; padding-right: 24px; }
+    .stattiles, .cards, .principles { grid-template-columns: 1fr; gap: 26px; }
+    .wrap { padding-left: 12px; padding-right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <h1>v4 — amber as accent only · three options for the philosophy block</h1>
+  <p>Full home page with option A in place, then B and C for comparison.</p>
+</div>
+
+<div class="band-label">
+  <div class="name">Full home page — with philosophy block option A (mid purple)<span class="rec">A recommended</span></div>
+  <div class="note">Amber now appears only on the nav button, stat labels, and the contact button</div>
+</div>
+<div class="wrap">
+<div class="page d">
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="cta">Get in touch</a></span>
+  </nav>
+
+  <div class="block dots" style="padding-top:96px;padding-bottom:88px">
+    <div class="binner">
+      <div class="eyebrow">Impact-Driven Design Leadership</div>
+      <h1>People.<br>Strategy.<br>Scale.</h1>
+      <p class="sub">I'm a Director of Product Design who leads design at scale in complex product ecosystems. I build people-first, inclusive design teams that navigate the ambiguity of AI-first product development, turning technology into clear business outcomes.</p>
+    </div>
+  </div>
+
+  <div class="block block-dark">
+    <div class="binner"><div class="stattiles">
+      <div><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+      <div><div class="n">10+</div><div class="k">Agentic Workflows</div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+      <div><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+    </div></div>
+  </div>
+
+  <div class="block">
+    <div class="binner">
+      <div class="sectionlabel">Selected work</div>
+      <div class="cards">
+        <div class="card"><div class="thumb"></div><div class="cbody">
+          <span class="stat">$1B+ Operational Savings</span>
+          <h3>Transforming Meta's Global Capacity Infra</h3>
+          <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems.</p>
+          <span class="go">View case study →</span></div></div>
+        <div class="card"><div class="thumb"></div><div class="cbody">
+          <span class="stat">10+ Agentic Workflows</span>
+          <h3>Agentic Workflow Transformation</h3>
+          <p>Defining the UX paradigm for proactive, non-deterministic AI environments.</p>
+          <span class="go">View case study →</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block ph-a">
+    <div class="binner">
+      <h2>Strong teams. Strong impact.</h2>
+      <p class="lead">Ecosystems are only as strong as the people who build them.</p>
+      <div class="principles">
+        <div><div class="p-n">01</div><h4>People first. Impact follows.</h4><p>Prioritize psychological safety and well-being, and massive business results follow.</p></div>
+        <div><div class="p-n">02</div><h4>Orchestrate systems, don't control pixels.</h4><p>Empower teams to build adaptable frameworks that navigate ambiguity with grace.</p></div>
+        <div><div class="p-n">03</div><h4>Inclusion is not an afterthought.</h4><p>Build it into the structures that already exist, not as a parallel initiative.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block block-dark" style="padding-top:74px;padding-bottom:74px">
+    <div class="binner">
+      <h2>Let's build what's next.</h2>
+      <p class="lead" style="opacity:.82;margin-bottom:30px">I'm always open to discussing AI-first product strategy, scaling design orgs, and the future of design.</p>
+      <span class="btn-amber">Email me</span><span class="btn-ghost">LinkedIn</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- B -->
+<div class="band-label">
+  <div class="name">Option B — warm gray with dots</div>
+  <div class="note">Quietest. Gives the eye a rest between two dark blocks, and lets the amber buttons pop harder</div>
+</div>
+<div class="wrap"><div class="page d">
+  <div class="block ph-b dots">
+    <div class="binner">
+      <h2>Strong teams. Strong impact.</h2>
+      <p class="lead">Ecosystems are only as strong as the people who build them.</p>
+      <div class="principles">
+        <div><div class="p-n">01</div><h4>People first. Impact follows.</h4><p>Prioritize psychological safety and well-being, and massive business results follow.</p></div>
+        <div><div class="p-n">02</div><h4>Orchestrate systems, don't control pixels.</h4><p>Empower teams to build adaptable frameworks that navigate ambiguity with grace.</p></div>
+        <div><div class="p-n">03</div><h4>Inclusion is not an afterthought.</h4><p>Build it into the structures that already exist, not as a parallel initiative.</p></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<!-- C -->
+<div class="band-label">
+  <div class="name">Option C — near-black with amber numerals</div>
+  <div class="note">Boldest. Closest in spirit to Mitchell's black block, with amber doing the accent work</div>
+</div>
+<div class="wrap"><div class="page d">
+  <div class="block ph-c">
+    <div class="binner">
+      <h2>Strong teams. Strong impact.</h2>
+      <p class="lead">Ecosystems are only as strong as the people who build them.</p>
+      <div class="principles">
+        <div><div class="p-n">01</div><h4>People first. Impact follows.</h4><p>Prioritize psychological safety and well-being, and massive business results follow.</p></div>
+        <div><div class="p-n">02</div><h4>Orchestrate systems, don't control pixels.</h4><p>Empower teams to build adaptable frameworks that navigate ambiguity with grace.</p></div>
+        <div><div class="p-n">03</div><h4>Inclusion is not an afterthought.</h4><p>Build it into the structures that already exist, not as a parallel initiative.</p></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+</body>
+</html>

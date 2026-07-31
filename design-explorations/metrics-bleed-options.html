@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metrics bleed — four interpretations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  .chrome-head { background: #1b2337; color: #fff; padding: 24px 32px; position: sticky; top: 0; z-index: 60; }
+  .chrome-head h1 { font-family: 'Source Serif 4', serif; font-size: 19px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .band-label { padding: 28px 32px 12px; max-width: 1140px; margin: 0 auto; }
+  .band-label .tag { display:inline-block; background:#241d3d; color:#fff; font-size:11px; font-weight:700;
+                     letter-spacing:.1em; padding:4px 9px; border-radius:3px; margin-right:10px; }
+  .band-label .name { font-size: 15px; font-weight: 600; color: #1b2337; }
+  .band-label .note { font-size: 13px; color: #6b7683; margin-top: 6px; max-width: 74ch; line-height:1.6; }
+
+  .wrap { padding: 0 32px 40px; }
+  .page { max-width: 1140px; margin: 0 auto; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 12px 32px rgba(0,0,0,.15); }
+
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --ink-head: #1b2337; --ink-muted: #78818f; --ink-faint: #9aa4b0; --rule: #e2e5ea;
+    --plum-900: #241d3d; --plum-700: #35294f; --plum-600: #4a2f66;
+    --accent: #6b4d9e; --amber: #f0c463; --r: 22px;
+    background:#fff; font-family: Inter, sans-serif;
+  }
+  .dots { background-image: radial-gradient(circle,#d3d6dd 1px,transparent 1px); background-size: 22px 22px; }
+  .inner { max-width: 1020px; margin: 0 auto; padding: 0 56px; }
+
+  nav { display:flex; align-items:center; justify-content:space-between; padding: 18px 56px;
+        border-bottom: 1px solid var(--rule); background:#fff; }
+  nav .wordmark { font-family: var(--font-head); font-weight: 700; font-size: 15px; color: var(--ink-head); }
+  nav .links { display:flex; gap:24px; align-items:center; }
+  nav a { font-size:13px; color: var(--ink-muted); text-decoration:none; }
+  nav .cta { background: var(--amber); color:#241d3d; padding:7px 15px; border-radius:999px; font-weight:600; }
+
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+             color: var(--accent); margin-bottom: 16px; }
+  h1.big { font-family: var(--font-head); font-size: clamp(2.3rem,4.4vw,3.4rem); line-height:1.05;
+           letter-spacing:-.015em; font-weight:600; color: var(--ink-head); }
+  .bio { font-size: 1.03rem; line-height:1.66; color: var(--ink-muted); margin-top:20px; max-width:50ch; }
+
+  .imgph { background:#ebebed; border:1px dashed #c3c4c9; display:flex; align-items:center; justify-content:center; }
+  .imgph .t { color:#8b8d94; font-size:12px; text-align:center; line-height:1.7; }
+  .imgph .t b { display:block; color:#5f6169; font-size:13px; margin-bottom:4px; font-weight:600; }
+
+  /* metric card */
+  .mcard { background: var(--plum-700); border-radius: var(--r); padding: 30px 26px 28px;
+           box-shadow: 0 14px 34px rgba(36,29,61,.24); }
+  .mcard .n { font-family: var(--font-head); font-size: 2.7rem; font-weight:700; line-height:1; color:#fff; letter-spacing:-.02em; }
+  .mcard .k { font-size: 11.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color: var(--amber); margin:14px 0 10px; }
+  .mcard .t { font-size:.92rem; line-height:1.6; color:#b6aecb; }
+
+  .mwide { background: var(--plum-600); border-radius: var(--r); padding:32px 36px;
+           display:flex; align-items:center; justify-content:space-between; gap:24px; }
+  .mwide h3 { font-family: var(--font-head); font-size:1.5rem; font-weight:600; color:#fff; line-height:1.22; }
+  .mwide p { font-size:.94rem; color:#cabbd9; margin-top:7px; }
+  .mwide .go { background: var(--amber); color:#241d3d; padding:11px 20px; border-radius:999px;
+               font-size:13px; font-weight:700; white-space:nowrap; }
+
+  .mgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+
+  /* ─────────── A: overlap upward into hero bg (v7) ─────────── */
+  .A .hero { padding: 60px 0 120px; }
+  .A .herogrid { display:grid; grid-template-columns:.85fr 1.15fr; gap:52px; align-items:center; }
+  .A .portrait { aspect-ratio:4/5; border-radius:14px; }
+  .A .metrics { background: var(--plum-900); padding: 0 0 64px; }
+  .A .mgrid { margin-top:-86px; position:relative; z-index:5; }
+  .A .mwide { margin-top:18px; }
+
+  /* ─────────── B: cards overlap the portrait image ─────────── */
+  .B .hero { padding: 56px 0 0; }
+  .B .herogrid { display:grid; grid-template-columns:.85fr 1.15fr; gap:52px; align-items:center; }
+  .B .portrait { aspect-ratio:4/5; border-radius:14px; }
+  .B .metrics { background: var(--plum-900); padding: 0 0 64px; margin-top:-130px; position:relative; }
+  .B .mgrid { padding-top:0; margin-top:0; position:relative; z-index:5; transform: translateY(-46px); }
+  .B .mwide { margin-top:-28px; }
+  .B .bandtop { height:130px; }
+
+  /* ─────────── C: full-width image banner, cards overlap it ─────────── */
+  .C .banner { position:relative; }
+  .C .bannerimg { height: 340px; border-radius:0; border-left:0; border-right:0; }
+  .C .metrics { background: var(--plum-900); padding: 0 0 64px; }
+  .C .mgrid { margin-top:-96px; position:relative; z-index:5; }
+  .C .mwide { margin-top:18px; }
+
+  /* ─────────── D: cards break out wider than the text column ─────────── */
+  .D .hero { padding: 60px 0 120px; }
+  .D .herogrid { display:grid; grid-template-columns:.85fr 1.15fr; gap:52px; align-items:center; }
+  .D .portrait { aspect-ratio:4/5; border-radius:14px; }
+  .D .metrics { background: var(--plum-900); padding: 0 0 64px; }
+  .D .widecontainer { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  .D .mgrid { margin-top:-86px; position:relative; z-index:5; }
+  .D .mwide { margin-top:18px; }
+
+  @media (max-width: 880px) {
+    .inner, nav, .D .widecontainer { padding-left:20px; padding-right:20px; }
+    .herogrid { grid-template-columns:1fr !important; gap:26px; }
+    .mgrid { grid-template-columns:1fr; }
+    .mwide { flex-direction:column; align-items:flex-start; }
+    .wrap { padding-left:10px; padding-right:10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <h1>Which one did you mean?</h1>
+  <p>Four readings of "the metrics boxes bleed out of that section into the images up." Point at the closest.</p>
+</div>
+
+<!-- ══════ A ══════ -->
+<div class="band-label">
+  <span class="tag">A</span><span class="name">Cards overlap upward into the hero background</span>
+  <div class="note">What I built in v7. The cards lift out of the dark band and sit over the dotted hero area — but they overlap empty background, not the image.</div>
+</div>
+<div class="wrap"><div class="page d A">
+  <nav><span class="wordmark">Ramya Ramaswamy</span><span class="links"><a>Work</a><a>Philosophy</a><a class="cta">Get in touch</a></span></nav>
+  <div class="hero dots"><div class="inner"><div class="herogrid">
+    <div class="imgph portrait"><div class="t"><b>Portrait photo</b>4:5</div></div>
+    <div><div class="eyebrow">Impact-Driven Design Leadership</div><h1 class="big">People.<br>Strategy.<br>Scale.</h1>
+    <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems.</p></div>
+  </div></div></div>
+  <div class="metrics"><div class="inner">
+    <div class="mgrid">
+      <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+      <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows</div><div class="t">Transformed 5+ complex products.</div></div>
+      <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Through design-led systems solutions.</div></div>
+    </div>
+    <div class="mwide"><div><h3>Strong teams. Strong impact.</h3><p>Learn about my leadership philosophy</p></div><span class="go">Read my philosophy →</span></div>
+  </div></div>
+</div></div>
+
+<!-- ══════ B ══════ -->
+<div class="band-label">
+  <span class="tag">B</span><span class="name">Cards overlap the portrait image itself</span>
+  <div class="note">The dark band starts higher, so the cards physically sit on top of the bottom of the portrait — the image runs behind them.</div>
+</div>
+<div class="wrap"><div class="page d B">
+  <nav><span class="wordmark">Ramya Ramaswamy</span><span class="links"><a>Work</a><a>Philosophy</a><a class="cta">Get in touch</a></span></nav>
+  <div class="hero dots"><div class="inner"><div class="herogrid">
+    <div class="imgph portrait"><div class="t"><b>Portrait photo</b>4:5</div></div>
+    <div><div class="eyebrow">Impact-Driven Design Leadership</div><h1 class="big">People.<br>Strategy.<br>Scale.</h1>
+    <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems.</p></div>
+  </div></div></div>
+  <div class="metrics"><div class="inner">
+    <div class="mgrid">
+      <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+      <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows</div><div class="t">Transformed 5+ complex products.</div></div>
+      <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Through design-led systems solutions.</div></div>
+    </div>
+    <div class="mwide"><div><h3>Strong teams. Strong impact.</h3><p>Learn about my leadership philosophy</p></div><span class="go">Read my philosophy →</span></div>
+  </div></div>
+</div></div>
+
+<!-- ══════ C ══════ -->
+<div class="band-label">
+  <span class="tag">C</span><span class="name">Full-width image banner, cards overlap onto it</span>
+  <div class="note">Your photo runs edge to edge as a wide banner under the hero text, and the metric cards straddle its bottom edge.</div>
+</div>
+<div class="wrap"><div class="page d C">
+  <nav><span class="wordmark">Ramya Ramaswamy</span><span class="links"><a>Work</a><a>Philosophy</a><a class="cta">Get in touch</a></span></nav>
+  <div class="dots" style="padding:60px 0 44px"><div class="inner">
+    <div class="eyebrow">Impact-Driven Design Leadership</div>
+    <h1 class="big">People. Strategy. Scale.</h1>
+    <p class="bio" style="max-width:62ch">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling.</p>
+  </div></div>
+  <div class="banner"><div class="imgph bannerimg"><div class="t"><b>Portrait photo — wide crop</b>full-bleed banner, 16:5</div></div></div>
+  <div class="metrics"><div class="inner">
+    <div class="mgrid">
+      <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+      <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows</div><div class="t">Transformed 5+ complex products.</div></div>
+      <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Through design-led systems solutions.</div></div>
+    </div>
+    <div class="mwide"><div><h3>Strong teams. Strong impact.</h3><p>Learn about my leadership philosophy</p></div><span class="go">Read my philosophy →</span></div>
+  </div></div>
+</div></div>
+
+<!-- ══════ D ══════ -->
+<div class="band-label">
+  <span class="tag">D</span><span class="name">Cards break out wider than the content column</span>
+  <div class="note">Same upward overlap as A, but the card row is wider than the text above it — spilling out past the column edges toward the page edges.</div>
+</div>
+<div class="wrap"><div class="page d D">
+  <nav><span class="wordmark">Ramya Ramaswamy</span><span class="links"><a>Work</a><a>Philosophy</a><a class="cta">Get in touch</a></span></nav>
+  <div class="hero dots"><div class="inner"><div class="herogrid">
+    <div class="imgph portrait"><div class="t"><b>Portrait photo</b>4:5</div></div>
+    <div><div class="eyebrow">Impact-Driven Design Leadership</div><h1 class="big">People.<br>Strategy.<br>Scale.</h1>
+    <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems.</p></div>
+  </div></div></div>
+  <div class="metrics"><div class="widecontainer">
+    <div class="mgrid">
+      <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+      <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows</div><div class="t">Transformed 5+ complex products.</div></div>
+      <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Through design-led systems solutions.</div></div>
+    </div>
+    <div class="mwide"><div><h3>Strong teams. Strong impact.</h3><p>Learn about my leadership philosophy</p></div><span class="go">Read my philosophy →</span></div>
+  </div></div>
+</div></div>
+
+</body>
+</html>

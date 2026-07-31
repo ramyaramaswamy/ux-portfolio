@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v12 options — gold, backdrop, scribble, tags</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; color: #4a5468; }
+
+  :root {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff; --paper-alt: #f7f7f5;
+    --ink-head: #1b2337; --ink-body: #4a5468; --ink-muted: #78818f;
+    --rule: #e2e5ea;
+    --plum-900: #241d3d; --plum-700: #35294f; --plum-600: #4a2f66;
+
+    /* darkened from v11's #6b4d9e */
+    --accent: #57398a; --accent-hover: #452c6f;
+
+    /* the three candidates */
+    --gold-a: #c9a227;   /* antique brass */
+    --gold-b: #d9a521;   /* honey gold    */
+    --gold-c: #e8cd8f;   /* champagne     */
+    --gold-v11: #f0c463; /* what you have now */
+
+    --r-card: 18px;
+  }
+
+  /* ═══════ PAGE CHROME ═══════ */
+  .chrome { background: #1b2337; color: #fff; padding: 26px 34px; position: sticky; top: 0; z-index: 80; }
+  .chrome h1 { font-family: var(--font-head); font-size: 20px; font-weight: 600; }
+  .chrome p { font-size: 13px; color: #9aa4b8; margin-top: 6px; max-width: 76ch; line-height: 1.6; }
+
+  .sheet { max-width: 1240px; margin: 0 auto; padding: 34px 24px 90px; }
+
+  .band { background: var(--paper); border-radius: 8px; margin-bottom: 30px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.09), 0 10px 30px rgba(0,0,0,.10); }
+  .band > header { padding: 26px 34px 22px; border-bottom: 1px solid var(--rule); }
+  .band > header .num { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em;
+                        color: var(--accent); font-weight: 500; }
+  .band > header h2 { font-family: var(--font-head); font-size: 1.5rem; font-weight: 600;
+                      color: var(--ink-head); margin-top: 8px; }
+  .band > header p { font-size: .92rem; line-height: 1.65; color: var(--ink-muted); margin-top: 9px; max-width: 74ch; }
+  .band > .body { padding: 30px 34px 36px; }
+
+  .label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .07em;
+           color: var(--ink-muted); text-transform: uppercase; margin-bottom: 12px; display: block; }
+  .label b { color: var(--ink-head); font-weight: 600; }
+  .note { font-size: .85rem; line-height: 1.6; color: var(--ink-muted); margin-top: 12px; }
+  .rec { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+         color:#1c6b4a; background:#dff3e8; padding:3px 9px; border-radius:999px; margin-left:8px; vertical-align:2px; }
+
+  /* ═══════ BUTTONS — the three roles ═══════ */
+  .btn { background: var(--accent); color:#fff; padding:13px 26px; border-radius:999px;
+         font-size:13.5px; font-weight:600; display:inline-block; transition:.16s; text-decoration:none; border:0; cursor:pointer; }
+  .btn:hover { background: var(--accent-hover); }
+
+  .btn-ink { background: transparent; border:1.5px solid var(--plum-900); color: var(--plum-900);
+             padding:11.5px 25px; border-radius:999px; font-size:13.5px; font-weight:600;
+             display:inline-block; transition:.16s; text-decoration:none; cursor:pointer; }
+  .btn-ink:hover { background: var(--plum-900); color:#fff; }
+
+  .btn-on-dark { background: transparent; border:1px solid rgba(255,255,255,.55); color:#fff;
+                 padding:12px 25px; border-radius:999px; font-size:13.5px; font-weight:600;
+                 display:inline-block; transition:.16s; text-decoration:none; }
+  .btn-on-dark:hover { background: rgba(255,255,255,.12); border-color:#fff; }
+
+  /* ═══════ 1 — GOLD CANDIDATES ═══════ */
+  .goldrow { border:1px solid var(--rule); border-radius:14px; overflow:hidden; margin-bottom:26px; }
+  .goldrow > .head { display:flex; align-items:center; gap:14px; padding:14px 20px; background: var(--paper-alt);
+                     border-bottom:1px solid var(--rule); }
+  .swatch { width:34px; height:34px; border-radius:8px; flex:none; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+  .goldrow .head .nm { font-weight:600; color:var(--ink-head); font-size:.95rem; }
+  .goldrow .head .hex { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-muted); }
+  .goldrow .head .desc { font-size:.85rem; color:var(--ink-muted); margin-left:auto; text-align:right; max-width:38ch; line-height:1.5; }
+
+  .goldgrid { display:grid; grid-template-columns: 220px 1fr 1fr; gap:0; }
+  .goldgrid > * { padding:26px 24px; }
+  .goldgrid > * + * { border-left:1px solid var(--rule); }
+
+  .numdemo { background: var(--plum-900); display:flex; flex-direction:column; justify-content:center; }
+  .numdemo .n { font-family: var(--font-head); font-size:3.1rem; font-weight:700; line-height:1; letter-spacing:-.02em; }
+  .numdemo .k { font-size:.98rem; font-weight:600; color:#fff; margin-top:12px; }
+  .numdemo .cap { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em;
+                  color:#7d7690; text-transform:uppercase; margin-top:18px; }
+
+  .blockcell { background: var(--paper-alt); }
+  .blockcell .cap { font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em;
+                    color:var(--ink-muted); text-transform:uppercase; margin-bottom:14px; }
+
+  /* loud: full gold fill */
+  .mwide-loud { border-radius: var(--r-card); padding: 28px 30px; display:flex; align-items:center;
+                justify-content:space-between; gap:22px; flex-wrap:wrap; }
+  .mwide-loud h3 { font-family: var(--font-head); font-size:1.45rem; font-weight:600; color:var(--plum-900); line-height:1.22; }
+  .mwide-loud p { font-size:.92rem; color: rgba(36,29,61,.74); margin-top:7px; }
+
+  /* inverted: paper fill, gold border, gold only on the tag */
+  .mwide-inv { border-radius: var(--r-card); padding: 28px 30px; background: var(--paper);
+               display:flex; align-items:center; justify-content:space-between; gap:22px; flex-wrap:wrap; border:2px solid; }
+  .mwide-inv h3 { font-family: var(--font-head); font-size:1.45rem; font-weight:600; color:var(--plum-900); line-height:1.22; margin-top:10px; }
+  .mwide-inv p { font-size:.92rem; color: var(--ink-muted); margin-top:7px; }
+  .mwide-inv .tag { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.1em;
+                    text-transform:uppercase; color: var(--plum-900); padding:4px 11px; border-radius:999px; }
+
+  /* ═══════ 2 — BACKDROP ═══════ */
+  .backgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .minihero { border:1px solid var(--rule); border-radius:14px; overflow:hidden; }
+  .minihero .cap { padding:13px 18px; background:var(--paper-alt); border-bottom:1px solid var(--rule);
+                   font-size:.86rem; }
+  .minihero .cap b { display:block; color:var(--ink-head); font-size:.94rem; margin-bottom:3px; font-weight:600; }
+  .minihero .cap span { color:var(--ink-muted); line-height:1.5; }
+
+  .stage { position:relative; background:var(--paper); overflow:hidden; padding:22px 20px 0; min-height:320px;
+           display:flex; align-items:flex-end; }
+  .stage .bg { position:absolute; inset:0; z-index:0; }
+  .stage .bg svg { width:100%; height:100%; display:block; }
+  .stage .fg { position:relative; z-index:2; display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:end; width:100%; }
+  .stage .fg img { width:100%; max-width:150px; display:block; }
+  .stage .fg .copy { padding-bottom:30px; }
+  .stage .fg .copy .eyebrow { font-size:9px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+                              color:var(--accent); margin-bottom:8px; }
+  .stage .fg .copy h3 { font-family:var(--font-head); font-size:1.5rem; line-height:1.05; font-weight:600;
+                        color:var(--ink-head); letter-spacing:-.015em; }
+  .dots-layer { position:absolute; inset:0; background-image: radial-gradient(circle,#d3d6dd 1px,transparent 1px);
+                background-size:22px 22px; }
+
+  /* ═══════ 3 — SCRIBBLE ═══════ */
+  .scribgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+  .scribcell { border:1px solid var(--rule); border-radius:14px; padding:34px 30px 30px; background:var(--paper-alt); }
+  .scribcell .cap { font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em;
+                    text-transform:uppercase; color:var(--ink-muted); margin-bottom:22px; }
+  .scribcell .cap b { color:var(--ink-head); font-weight:600; }
+  .headline { font-family:var(--font-head); font-size:2.6rem; line-height:1.06; font-weight:600;
+              color:var(--ink-head); letter-spacing:-.015em; }
+  .markword { position:relative; display:inline-block; }
+  .markword svg { position:absolute; left:-6%; width:112%; overflow:visible; pointer-events:none; }
+  .mk-under { bottom:-14px; height:22px; }
+  .mk-circle { top:-16%; left:-9%; width:118%; height:132%; bottom:auto; }
+  .mk-swipe  { top:8%; left:-4%; width:108%; height:84%; bottom:auto; z-index:-1; }
+
+  /* ═══════ 4 — TAGS ═══════ */
+  .taggrid { display:grid; grid-template-columns:repeat(2,1fr); gap:22px; }
+  .tagcell { border:1px solid var(--rule); border-radius:14px; padding:30px; background:var(--paper-alt); }
+  .tagcell .cap { font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--ink-muted); margin-bottom:20px; }
+  .tagcell .cap b { color:var(--ink-head); font-weight:600; }
+  .tagcell h4 { font-family:var(--font-head); font-size:1.7rem; font-weight:600; color:var(--ink-head);
+                margin-top:14px; letter-spacing:-.012em; }
+  .tagcell .demo + .demo { margin-top:26px; padding-top:24px; border-top:1px dashed var(--rule); }
+
+  .t-pill    { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+               background:var(--gold-b); color:var(--plum-900); padding:5px 13px; border-radius:999px; }
+  .t-mono    { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.04em; color:var(--accent); }
+  .t-caps    { display:flex; align-items:center; gap:11px; font-size:10.5px; font-weight:700; letter-spacing:.14em;
+               text-transform:uppercase; color:var(--accent); }
+  .t-caps::before { content:''; width:26px; height:2px; background:var(--gold-b); flex:none; }
+  .t-sticker { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+               background:var(--gold-b); color:var(--plum-900); padding:6px 14px; border-radius:6px;
+               transform:rotate(-2.2deg); box-shadow:0 2px 8px rgba(36,29,61,.14); }
+
+  /* ═══════ 5 — BUTTONS ═══════ */
+  .btnrow { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  .btnstage { padding:26px 28px; border-radius:14px; border:1px solid var(--rule); }
+  .btnstage + .btnstage { margin-top:18px; }
+  .on-paper { background:var(--paper-alt); }
+  .on-gold  { background:var(--gold-b); border-color:transparent; }
+  .on-dark  { background:var(--plum-900); border-color:transparent; }
+  .btnstage .cap { font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em;
+                   text-transform:uppercase; margin-bottom:16px; }
+  .on-paper .cap { color:var(--ink-muted); }
+  .on-gold  .cap { color: rgba(36,29,61,.66); }
+  .on-dark  .cap { color:#7d7690; }
+
+  @media (max-width: 1080px) {
+    .goldgrid { grid-template-columns:1fr; }
+    .goldgrid > * + * { border-left:0; border-top:1px solid var(--rule); }
+    .backgrid { grid-template-columns:1fr; }
+    .scribgrid, .taggrid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <h1>v12 options — gold, backdrop, scribble, tags</h1>
+  <p>Everything here is a comparison, not a proposal. Pick one per section and I'll build v12 from your choices.
+     The purple is already darkened to <b>#57398a</b> throughout, and the new ink-outline secondary button is in use
+     on the gold blocks — both are live in every example below.</p>
+</div>
+
+<div class="sheet">
+
+  <!-- ══════════════════════════════════════════════════════════════
+       1 — GOLD
+       ══════════════════════════════════════════════════════════ -->
+  <div class="band">
+    <header>
+      <div class="num">01</div>
+      <h2>One gold, three candidates</h2>
+      <p>Each row uses a <b>single</b> gold for both the metric numeral and the block — no more pale/full split.
+         Left cell is the numeral on plum; middle is the loud treatment; right is the inverted treatment.
+         Your current <span style="font-family:'JetBrains Mono',monospace">#f0c463</span> is included last for reference.</p>
+    </header>
+    <div class="body">
+
+      <!-- A — antique brass -->
+      <div class="goldrow">
+        <div class="head">
+          <div class="swatch" style="background:var(--gold-a)"></div>
+          <div>
+            <div class="nm">A — Antique brass</div>
+            <div class="hex">#c9a227</div>
+          </div>
+          <div class="desc">Deepest of the three. Editorial and expensive, but the loud block tips toward mustard.</div>
+        </div>
+        <div class="goldgrid">
+          <div class="numdemo">
+            <div class="n" style="color:var(--gold-a)">$1B+</div>
+            <div class="k">Operational Savings</div>
+            <div class="cap">numeral on plum</div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Loud — full fill</div>
+            <div class="mwide-loud" style="background:var(--gold-a)">
+              <div>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Inverted — border only</div>
+            <div class="mwide-inv" style="border-color:var(--gold-a)">
+              <div>
+                <span class="tag" style="background:var(--gold-a)">Leadership</span>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- B — honey gold -->
+      <div class="goldrow">
+        <div class="head">
+          <div class="swatch" style="background:var(--gold-b)"></div>
+          <div>
+            <div class="nm">B — Honey gold <span class="rec">my pick</span></div>
+            <div class="hex">#d9a521</div>
+          </div>
+          <div class="desc">Hue pushed down to ~38° so it sits opposite the plum on the wheel. Clearly gold, not lemon, not beige.</div>
+        </div>
+        <div class="goldgrid">
+          <div class="numdemo">
+            <div class="n" style="color:var(--gold-b)">$1B+</div>
+            <div class="k">Operational Savings</div>
+            <div class="cap">numeral on plum</div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Loud — full fill</div>
+            <div class="mwide-loud" style="background:var(--gold-b)">
+              <div>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Inverted — border only</div>
+            <div class="mwide-inv" style="border-color:var(--gold-b)">
+              <div>
+                <span class="tag" style="background:var(--gold-b)">Leadership</span>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- C — champagne -->
+      <div class="goldrow">
+        <div class="head">
+          <div class="swatch" style="background:var(--gold-c)"></div>
+          <div>
+            <div class="nm">C — Champagne</div>
+            <div class="hex">#e8cd8f</div>
+          </div>
+          <div class="desc">Quiet and luxurious as a fill — but watch the numeral lose its punch, and the inverted border almost vanish.</div>
+        </div>
+        <div class="goldgrid">
+          <div class="numdemo">
+            <div class="n" style="color:var(--gold-c)">$1B+</div>
+            <div class="k">Operational Savings</div>
+            <div class="cap">numeral on plum</div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Loud — full fill</div>
+            <div class="mwide-loud" style="background:var(--gold-c)">
+              <div>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Inverted — border only</div>
+            <div class="mwide-inv" style="border-color:var(--gold-c)">
+              <div>
+                <span class="tag" style="background:var(--gold-c)">Leadership</span>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- v11 reference -->
+      <div class="goldrow" style="opacity:.72">
+        <div class="head">
+          <div class="swatch" style="background:var(--gold-v11)"></div>
+          <div>
+            <div class="nm">Reference — what you have now</div>
+            <div class="hex">#f0c463</div>
+          </div>
+          <div class="desc">Hue ~42° — the lemon reading. Shown at full fill so you can compare like for like.</div>
+        </div>
+        <div class="goldgrid">
+          <div class="numdemo">
+            <div class="n" style="color:var(--gold-v11)">$1B+</div>
+            <div class="k">Operational Savings</div>
+            <div class="cap">numeral on plum</div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Loud — full fill</div>
+            <div class="mwide-loud" style="background:var(--gold-v11)">
+              <div>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+          <div class="blockcell">
+            <div class="cap">Inverted — border only</div>
+            <div class="mwide-inv" style="border-color:var(--gold-v11)">
+              <div>
+                <span class="tag" style="background:var(--gold-v11)">Leadership</span>
+                <h3>Strong teams. Strong impact.</h3>
+                <p>Learn about my leadership philosophy</p>
+              </div>
+              <a href="#" class="btn-ink">Read my philosophy →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="note"><b>What to look for:</b> in the loud column, does the block feel like a deliberate full-stop or like
+        a highlighter accident? In the inverted column, does the page feel calmer — and is the gold still present enough
+        to count as a brand colour?</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       2 — BACKDROP
+       ══════════════════════════════════════════════════════════ -->
+  <div class="band">
+    <header>
+      <div class="num">02</div>
+      <h2>Grayscale backdrop — three contour densities</h2>
+      <p>Topographic contours, drawn as SVG so there's nothing to source or license.
+         All three stay in the light half of the value range on purpose: your portrait is a cut-out in
+         <b>all black</b>, so anything mid-to-dark behind it would swallow the silhouette.</p>
+    </header>
+    <div class="body">
+      <div class="backgrid">
+
+        <!-- fine -->
+        <div class="minihero">
+          <div class="cap"><b>i — Fine</b><span>13 rings, hairline stroke. Reads as texture; you notice it second.</span></div>
+          <div class="stage">
+            <div class="bg">
+              <svg viewBox="0 0 800 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <path id="blob-fine" d="M400,120 C520,120 620,190 650,290 C680,390 630,500 520,560 C410,620 270,600 190,520 C110,440 110,300 190,215 C250,150 320,120 400,120 Z"/>
+                </defs>
+                <g fill="none" stroke="#c9ccd3" stroke-width="1">
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.16) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.27) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.38) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.49) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.60) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.71) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.82) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(0.93) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(1.04) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(1.15) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(1.26) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(1.37) translate(-400,-360)"/>
+                  <use href="#blob-fine" transform="translate(400,360) scale(1.48) translate(-400,-360)"/>
+                </g>
+              </svg>
+            </div>
+            <div class="fg">
+              <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+              <div class="copy">
+                <div class="eyebrow">Impact-Driven Design Leadership</div>
+                <h3>People.<br>Strategy.<br>Scale.</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- bold -->
+        <div class="minihero">
+          <div class="cap"><b>ii — Bold &amp; sparse</b><span>7 rings, heavier stroke. Reads as a graphic device; you notice it first.</span></div>
+          <div class="stage">
+            <div class="bg">
+              <svg viewBox="0 0 800 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <path id="blob-bold" d="M400,120 C520,120 620,190 650,290 C680,390 630,500 520,560 C410,620 270,600 190,520 C110,440 110,300 190,215 C250,150 320,120 400,120 Z"/>
+                </defs>
+                <g fill="none" stroke="#bcc0c9" stroke-width="1.8">
+                  <use href="#blob-bold" transform="translate(400,360) scale(0.22) translate(-400,-360)"/>
+                  <use href="#blob-bold" transform="translate(400,360) scale(0.43) translate(-400,-360)"/>
+                  <use href="#blob-bold" transform="translate(400,360) scale(0.64) translate(-400,-360)"/>
+                  <use href="#blob-bold" transform="translate(400,360) scale(0.85) translate(-400,-360)"/>
+                  <use href="#blob-bold" transform="translate(400,360) scale(1.06) translate(-400,-360)"/>
+                  <use href="#blob-bold" transform="translate(400,360) scale(1.27) translate(-400,-360)"/>
+                  <use href="#blob-bold" transform="translate(400,360) scale(1.48) translate(-400,-360)"/>
+                </g>
+              </svg>
+            </div>
+            <div class="fg">
+              <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+              <div class="copy">
+                <div class="eyebrow">Impact-Driven Design Leadership</div>
+                <h3>People.<br>Strategy.<br>Scale.</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- layered -->
+        <div class="minihero">
+          <div class="cap"><b>iii — Contours + dots</b><span>Fine contours under the dot grid you already have. Keeps continuity with v11.</span></div>
+          <div class="stage">
+            <div class="bg">
+              <svg viewBox="0 0 800 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <path id="blob-layer" d="M400,120 C520,120 620,190 650,290 C680,390 630,500 520,560 C410,620 270,600 190,520 C110,440 110,300 190,215 C250,150 320,120 400,120 Z"/>
+                </defs>
+                <g fill="none" stroke="#ced1d8" stroke-width="1">
+                  <use href="#blob-layer" transform="translate(400,360) scale(0.16) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(0.30) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(0.44) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(0.58) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(0.72) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(0.86) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(1.00) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(1.14) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(1.28) translate(-400,-360)"/>
+                  <use href="#blob-layer" transform="translate(400,360) scale(1.42) translate(-400,-360)"/>
+                </g>
+              </svg>
+              <div class="dots-layer" style="opacity:.65"></div>
+            </div>
+            <div class="fg">
+              <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+              <div class="copy">
+                <div class="eyebrow">Impact-Driven Design Leadership</div>
+                <h3>People.<br>Strategy.<br>Scale.</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <p class="note"><b>Worth deciding separately:</b> whether the contours stay contained in the hero (as shown) or
+        run behind the whole upper page and fade out under the metrics band. The second is more atmospheric but
+        competes with the dark band's edge.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       3 — SCRIBBLE
+       ══════════════════════════════════════════════════════════ -->
+  <div class="band">
+    <header>
+      <div class="num">03</div>
+      <h2>The hand-drawn mark</h2>
+      <p>All four target <b>“Scale.”</b> — the last and most claimable of the three words. Each is a hand-authored SVG path,
+         deliberately irregular so it doesn't read as a border-bottom. Gold shown is honey <span style="font-family:'JetBrains Mono',monospace">#d9a521</span>.</p>
+    </header>
+    <div class="body">
+      <div class="scribgrid">
+
+        <div class="scribcell">
+          <div class="cap"><b>a — Single underline</b> · closest to Mitch</div>
+          <div class="headline">People.<br>Strategy.<br><span class="markword">Scale.<svg class="mk-under" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></div>
+        </div>
+
+        <div class="scribcell">
+          <div class="cap"><b>b — Double pass</b> · sketchier, more energy</div>
+          <div class="headline">People.<br>Strategy.<br><span class="markword">Scale.<svg class="mk-under" viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,11 C38,4 74,13 108,6 C136,1 164,9 196,3" fill="none" stroke="#d9a521" stroke-width="3" stroke-linecap="round"/><path d="M10,17 C44,11 78,18 112,12 C142,7 168,15 192,10" fill="none" stroke="#d9a521" stroke-width="2.2" stroke-linecap="round" opacity=".62"/></svg></span></div>
+        </div>
+
+        <div class="scribcell">
+          <div class="cap"><b>c — Lasso circle</b> · most playful, most risk</div>
+          <div class="headline">People.<br>Strategy.<br><span class="markword">Scale.<svg class="mk-circle" viewBox="0 0 220 90" preserveAspectRatio="none" aria-hidden="true"><path d="M28,68 C6,48 22,16 78,8 C142,-1 208,12 212,38 C215,60 168,82 104,84 C56,85 24,76 18,60 C13,47 30,32 58,24" fill="none" stroke="#d9a521" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+        </div>
+
+        <div class="scribcell">
+          <div class="cap"><b>d — Highlighter swipe</b> · warmest, least “drawn”</div>
+          <div class="headline">People.<br>Strategy.<br><span class="markword">Scale.<svg class="mk-swipe" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true"><path d="M6,30 C50,24 96,28 142,22 C168,19 186,24 196,18 L194,34 C160,39 120,34 78,38 C48,40 22,36 6,38 Z" fill="#d9a521" opacity=".42"/></svg></span></div>
+        </div>
+
+      </div>
+      <p class="note"><b>My read:</b> (a) or (b). The lasso fights the three-line stack — it needs horizontal room the
+        headline doesn't have. The swipe is handsome but it's a highlighter, not a hand, so it loses the
+        “someone drew this” quality that makes the device work.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       4 — TAGS
+       ══════════════════════════════════════════════════════════ -->
+  <div class="band">
+    <header>
+      <div class="num">04</div>
+      <h2>Section tags</h2>
+      <p>Right now only the hero is labelled — the metrics band, work section and contact all arrive unannounced.
+         Tags fix that <em>and</em> break the vertical monotony. Each treatment is shown twice so you can judge it
+         as a repeating system rather than a one-off.</p>
+    </header>
+    <div class="body">
+      <div class="taggrid">
+
+        <div class="tagcell">
+          <div class="cap"><b>a — Gold pill</b></div>
+          <div class="demo"><span class="t-pill">Selected work</span><h4>Two problems worth the detail</h4></div>
+          <div class="demo"><span class="t-pill">By the numbers</span><h4>What the work moved</h4></div>
+        </div>
+
+        <div class="tagcell">
+          <div class="cap"><b>b — Bracketed mono</b></div>
+          <div class="demo"><span class="t-mono">[ selected work ]</span><h4>Two problems worth the detail</h4></div>
+          <div class="demo"><span class="t-mono">[ by the numbers ]</span><h4>What the work moved</h4></div>
+        </div>
+
+        <div class="tagcell">
+          <div class="cap"><b>c — Rule + small caps</b> · extends your existing eyebrow</div>
+          <div class="demo"><span class="t-caps">Selected work</span><h4>Two problems worth the detail</h4></div>
+          <div class="demo"><span class="t-caps">By the numbers</span><h4>What the work moved</h4></div>
+        </div>
+
+        <div class="tagcell">
+          <div class="cap"><b>d — Rotated sticker</b> · closest to Mitch</div>
+          <div class="demo"><span class="t-sticker">Selected work</span><h4>Two problems worth the detail</h4></div>
+          <div class="demo"><span class="t-sticker">By the numbers</span><h4>What the work moved</h4></div>
+        </div>
+
+      </div>
+      <p class="note"><b>Restraint check:</b> if you take a hand-drawn mark in §3 <em>and</em> the rotated sticker here,
+        that's two playful devices competing. I'd pair the drawn mark with (c), or the sticker with no scribble at all.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       5 — BUTTONS
+       ══════════════════════════════════════════════════════════ -->
+  <div class="band">
+    <header>
+      <div class="num">05</div>
+      <h2>The button set — now three roles</h2>
+      <p>Adding the ink outline takes you from two styles to three. Framing them as <b>roles</b> rather than
+         backgrounds is what keeps it from becoming four. Hover each one.</p>
+    </header>
+    <div class="body">
+
+      <div class="btnstage on-paper">
+        <div class="cap">On paper — primary + secondary</div>
+        <div class="btnrow">
+          <a href="#" class="btn">View case study →</a>
+          <a href="#" class="btn-ink">Read my philosophy →</a>
+          <span style="font-size:.85rem;color:var(--ink-muted)">purple darkened #6b4d9e → <b style="color:var(--ink-head)">#57398a</b></span>
+        </div>
+      </div>
+
+      <div class="btnstage on-gold">
+        <div class="cap">On gold — secondary only, per your call</div>
+        <div class="btnrow">
+          <a href="#" class="btn-ink">Read my philosophy →</a>
+        </div>
+      </div>
+
+      <div class="btnstage on-dark">
+        <div class="cap">On dark — white outline, kept as-is</div>
+        <div class="btnrow">
+          <a href="#" class="btn-on-dark">Email me</a>
+          <a href="#" class="btn-on-dark">LinkedIn</a>
+        </div>
+      </div>
+
+      <p class="note">Case study rows and the alternating image/text layout aren't shown here — that's a structural
+        change with no real choice to make, so it goes straight into v12 with the outer-edge bleed.</p>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

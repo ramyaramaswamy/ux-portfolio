@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v14 — full-width ground, hip down</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; color:#4a5468; }
+
+  .chrome { background:#1b2337; color:#fff; padding:26px 34px; position:sticky; top:0; z-index:80; }
+  .chrome h1 { font-family:'Source Serif 4',serif; font-size:20px; font-weight:600; }
+  .chrome p { font-size:13px; color:#9aa4b8; margin-top:6px; max-width:84ch; line-height:1.65; }
+
+  .sheet { max-width:1260px; margin:0 auto; padding:30px 24px 80px; }
+
+  .intro { background:#fff; border-radius:8px; padding:24px 30px; margin-bottom:26px;
+           box-shadow:0 1px 2px rgba(0,0,0,.09),0 10px 30px rgba(0,0,0,.10); }
+  .intro h2 { font-family:'Source Serif 4',serif; font-size:1.3rem; color:#1b2337; font-weight:600; margin-bottom:9px; }
+  .intro p { font-size:.93rem; line-height:1.7; color:#78818f; max-width:84ch; }
+  .intro p + p { margin-top:9px; }
+  .intro b { color:#1b2337; }
+
+  .demo { margin-bottom:34px; }
+  .demo-cap { background:#fff; border-radius:8px 8px 0 0; padding:16px 26px; border-bottom:1px solid #e2e5ea; }
+  .demo-cap .n { font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.09em;
+                 color:#57398a; text-transform:uppercase; }
+  .demo-cap b { display:block; font-size:1.02rem; color:#1b2337; font-weight:600; margin:5px 0 4px; }
+  .demo-cap span { font-size:.87rem; color:#78818f; line-height:1.55; }
+  .rec { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+         color:#1c6b4a; background:#dff3e8; padding:2px 8px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+
+  /* ═════════ shared page shell ═════════ */
+  .page { border-radius:0 0 8px 8px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,.09),0 10px 30px rgba(0,0,0,.10); }
+  .d {
+    --font-head:'Source Serif 4',Georgia,serif;
+    --paper:#fff; --ink-head:#1b2337; --ink-muted:#78818f; --rule:#e2e5ea;
+    --plum-900:#241d3d; --plum-700:#35294f;
+    --accent:#57398a; --gold:#d9a521;
+    --r-card:18px; --bleed:96px;
+    background:var(--paper); color:#4a5468; font-family:Inter,sans-serif;
+  }
+  .inner      { max-width:1000px; margin:0 auto; padding:0 56px; }
+  .inner-wide { max-width:1120px; margin:0 auto; padding:0 40px; }
+
+  .btn { background:var(--accent); color:#fff; padding:13px 26px; border-radius:999px;
+         font-size:13.5px; font-weight:600; display:inline-block; text-decoration:none; }
+
+  nav { display:flex; align-items:center; justify-content:space-between; padding:18px 56px;
+        border-bottom:1px solid var(--rule); background:var(--paper); position:relative; z-index:10; }
+  nav .wordmark { font-family:var(--font-head); font-weight:700; font-size:16px; color:var(--ink-head); }
+  nav .links { display:flex; gap:26px; align-items:center; }
+  nav a { font-size:13.5px; color:var(--ink-muted); text-decoration:none; }
+  nav .btn { padding:9px 20px; font-size:13px; }
+
+  .hero { padding:56px 0 0; position:relative; }
+  .hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .hero > .inner { position:relative; z-index:2; }
+  .herogrid { display:grid; grid-template-columns:.9fr 1.1fr; gap:48px; align-items:end; }
+  .portrait { display:flex; align-items:flex-end; justify-content:center; }
+  .portrait img { width:100%; max-width:430px; height:auto; display:block; }
+  .herotext { padding-bottom:calc(var(--bleed) + 34px); }
+  .herotext .eyebrow { font-size:11.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+                       color:var(--accent); margin-bottom:18px; }
+  .herotext h1 { font-family:var(--font-head); font-size:clamp(2.5rem,4.8vw,3.8rem); line-height:1.04;
+                 letter-spacing:-.015em; font-weight:600; color:var(--ink-head); }
+  .herotext .bio { font-size:1.06rem; line-height:1.68; color:var(--ink-muted); margin-top:30px; max-width:50ch; }
+  .herotext .btns { margin-top:30px; }
+  .markword { position:relative; display:inline-block; }
+  .markword svg { position:absolute; left:-5%; bottom:-16px; width:110%; height:22px; overflow:visible; }
+
+  .metrics { background:var(--plum-900); padding:0 0 54px; display:flow-root; }
+  .mgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+           margin-top:calc(var(--bleed) * -1); position:relative; z-index:5; }
+  .mcard { background:var(--plum-700); border-radius:var(--r-card); padding:32px 28px 30px;
+           box-shadow:0 18px 40px rgba(20,15,35,.34); }
+  .mcard .n { font-family:var(--font-head); font-size:3.1rem; font-weight:700; line-height:1;
+              color:var(--gold); letter-spacing:-.02em; }
+  .mcard .k { font-size:1.02rem; font-weight:600; color:#fff; margin-top:14px; }
+  .mcard .rule { width:44px; height:2px; background:rgba(255,255,255,.28); margin:16px 0; }
+  .mcard .t { font-size:.9rem; line-height:1.6; color:#a79fbd; }
+
+  /* ═════════ THE FOUR GROUNDS ═════════
+     Hip sits at roughly 66% of the hero's height; the metric cards cut in at ~85%.
+     Every option below is transparent above 52% — nothing goes anywhere near her head. */
+
+  /* a — soft wash, fades in at the hip and carries to the bottom */
+  .g-a .hero-bg {
+    background: linear-gradient(180deg,
+      rgba(36,29,61,0) 52%,
+      rgba(36,29,61,.035) 72%,
+      rgba(36,29,61,.055) 100%);
+  }
+
+  /* b — the same wash with a faint horizon rule at hip height */
+  .g-b .hero-bg {
+    background: linear-gradient(180deg,
+      rgba(36,29,61,0) 52%,
+      rgba(36,29,61,.035) 72%,
+      rgba(36,29,61,.055) 100%);
+  }
+  .g-b .hero-bg::after {
+    content:''; position:absolute; left:0; right:0; top:66%; height:1px;
+    background: linear-gradient(90deg,
+      rgba(36,29,61,0) 0%, rgba(36,29,61,.14) 18%, rgba(36,29,61,.14) 82%, rgba(36,29,61,0) 100%);
+  }
+
+  /* c — one wide soft ellipse, faint at the centre, gone at both page edges */
+  .g-c .hero-bg {
+    background: radial-gradient(ellipse 64% 33% at 50% 103%,
+      rgba(36,29,61,.10), rgba(36,29,61,0) 72%);
+  }
+
+  /* d — wash that fades back out before the cards, leaving clean paper at the card line */
+  .g-d .hero-bg {
+    background: linear-gradient(180deg,
+      rgba(36,29,61,0) 52%,
+      rgba(36,29,61,.05) 70%,
+      rgba(36,29,61,.05) 78%,
+      rgba(36,29,61,0) 87%);
+  }
+
+  .foot { background:#fff; border-radius:8px; padding:24px 30px; margin-top:6px;
+          box-shadow:0 1px 2px rgba(0,0,0,.09),0 10px 30px rgba(0,0,0,.10); }
+  .foot h2 { font-family:'Source Serif 4',serif; font-size:1.2rem; color:#1b2337; font-weight:600; margin-bottom:9px; }
+  .foot p { font-size:.92rem; line-height:1.7; color:#78818f; max-width:84ch; }
+  .foot p + p { margin-top:9px; }
+  .foot b { color:#1b2337; }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <h1>v14 — full-width ground, hip down</h1>
+  <p>Four readings of “something faint across the full width, behind me, hip to bottom.” No panels, no edges,
+     nothing above 52% of the hero. Each one shows the metric cards so you can judge the competition directly.</p>
+</div>
+
+<div class="sheet">
+
+  <div class="intro">
+    <h2>What I changed in my thinking</h2>
+    <p>The panel was boxy because it was a <b>shape with an edge</b> — and a vertical edge next to a grid of cards
+       will always look like a fifth card. Everything below is a <b>gradient with no edge anywhere</b>, spanning the
+       full page width.</p>
+    <p>On the geometry: your hip lands at about <b>66%</b> of the hero's height, and the metric cards cut into the
+       hero at about <b>85%</b>. So the usable zone is a band between those two lines — which is narrow, and is why
+       option <b>d</b> exists: it's the only one that clears out completely before the cards begin.</p>
+  </div>
+
+  <!-- a -->
+  <div class="demo">
+    <div class="demo-cap">
+      <div class="n">a</div>
+      <b>Soft wash, hip to bottom</b>
+      <span>Fades in at the hip, deepens gently all the way down. The plainest reading of what you asked for.</span>
+    </div>
+    <div class="page d g-a">
+      <nav><span class="wordmark">Ramya Ramaswamy</span>
+        <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="btn">Get in touch</a></span></nav>
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="inner"><div class="herogrid">
+          <div class="portrait"><img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy"></div>
+          <div class="herotext">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h1>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h1>
+            <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling.</p>
+            <div class="btns"><a href="#" class="btn">View case studies ↓</a></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="metrics"><div class="inner-wide"><div class="mgrid">
+        <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="rule"></div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows Launched</div><div class="rule"></div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="rule"></div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div></div></div>
+    </div>
+  </div>
+
+  <!-- b -->
+  <div class="demo">
+    <div class="demo-cap">
+      <div class="n">b</div>
+      <b>Wash + horizon line</b>
+      <span>Same wash, plus a hairline at hip height that fades out before either page edge. Gives her a horizon to stand on rather than just a tint.</span>
+    </div>
+    <div class="page d g-b">
+      <nav><span class="wordmark">Ramya Ramaswamy</span>
+        <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="btn">Get in touch</a></span></nav>
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="inner"><div class="herogrid">
+          <div class="portrait"><img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy"></div>
+          <div class="herotext">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h1>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h1>
+            <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling.</p>
+            <div class="btns"><a href="#" class="btn">View case studies ↓</a></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="metrics"><div class="inner-wide"><div class="mgrid">
+        <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="rule"></div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows Launched</div><div class="rule"></div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="rule"></div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div></div></div>
+    </div>
+  </div>
+
+  <!-- c -->
+  <div class="demo">
+    <div class="demo-cap">
+      <div class="n">c</div>
+      <b>Wide soft ellipse<span class="rec">my pick</span></b>
+      <span>One very faint pool centred behind her, dying out toward both page edges and toward the top. Full width, but weighted to her — so it reads as light falling on her, not as a band across the page.</span>
+    </div>
+    <div class="page d g-c">
+      <nav><span class="wordmark">Ramya Ramaswamy</span>
+        <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="btn">Get in touch</a></span></nav>
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="inner"><div class="herogrid">
+          <div class="portrait"><img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy"></div>
+          <div class="herotext">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h1>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h1>
+            <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling.</p>
+            <div class="btns"><a href="#" class="btn">View case studies ↓</a></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="metrics"><div class="inner-wide"><div class="mgrid">
+        <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="rule"></div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows Launched</div><div class="rule"></div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="rule"></div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div></div></div>
+    </div>
+  </div>
+
+  <!-- d -->
+  <div class="demo">
+    <div class="demo-cap">
+      <div class="n">d</div>
+      <b>Wash that clears before the cards</b>
+      <span>Fades in at the hip, then fades back out at ~87% so there's clean paper where the cards cut in. The zero-competition option.</span>
+    </div>
+    <div class="page d g-d">
+      <nav><span class="wordmark">Ramya Ramaswamy</span>
+        <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="btn">Get in touch</a></span></nav>
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="inner"><div class="herogrid">
+          <div class="portrait"><img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy"></div>
+          <div class="herotext">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h1>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h1>
+            <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling.</p>
+            <div class="btns"><a href="#" class="btn">View case studies ↓</a></div>
+          </div>
+        </div></div>
+      </div>
+      <div class="metrics"><div class="inner-wide"><div class="mgrid">
+        <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="rule"></div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows Launched</div><div class="rule"></div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="rule"></div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div></div></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <h2>How I'd read these</h2>
+    <p><b>c</b> is where I'd go. It's the only one that doesn't read as a horizontal band, because it's weighted
+       to her rather than spread evenly — it looks like light pooling behind her, and it's gone by the time it
+       reaches the left and right page edges, so there's no line for the cards to argue with.</p>
+    <p><b>d</b> is the safest if the cards still feel crowded. Nothing at all touches the card line.</p>
+    <p><b>b</b> is the riskiest — a horizon line is another horizontal edge, which is close to what didn't work
+       last time. In there because a literal line is one honest reading of "something across the width," not
+       because I expect it to win.</p>
+    <p>All four are faint by design, and screen brightness affects them a lot. If the direction is right but the
+       strength is wrong, that's one number — say <b>“c but twice as strong”</b> and it's done.</p>
+  </div>
+
+</div>
+
+</body>
+</html>

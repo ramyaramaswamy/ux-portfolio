@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v6 — Dark metrics band, rounded cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  .chrome-head { background: #1b2337; color: #fff; padding: 26px 32px; position: sticky; top: 0; z-index: 60; }
+  .chrome-head h1 { font-family: 'Source Serif 4', serif; font-size: 20px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .band-label { padding: 26px 32px 12px; }
+  .band-label .name { font-size: 15px; font-weight: 600; color: #1b2337; }
+  .band-label .note { font-size: 13px; color: #6b7683; margin-top: 3px; }
+
+  .wrap { padding: 26px 32px 44px; }
+  .page { max-width: 1140px; margin: 0 auto; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 14px 38px rgba(0,0,0,.16); }
+
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff;  --paper-alt: #f7f7f5;
+    --ink-head: #1b2337; --ink-body: #4a5468; --ink-muted: #78818f; --ink-faint: #9aa4b0;
+    --rule: #e2e5ea;
+    --plum-900: #241d3d; --plum-700: #35294f; --plum-600: #4a2f66;
+    --accent: #6b4d9e; --amber: #f0c463;
+    --r-card: 16px;              /* ← the roundness knob */
+    background: var(--paper); color: var(--ink-body); font-family: Inter, sans-serif;
+  }
+  .dots { background-image: radial-gradient(circle, #d3d6dd 1px, transparent 1px); background-size: 22px 22px; }
+  .inner { max-width: 1020px; margin: 0 auto; padding: 0 56px; }
+
+  nav { display:flex; align-items:center; justify-content:space-between;
+        padding: 20px 56px; border-bottom: 1px solid var(--rule); background: var(--paper); }
+  nav .wordmark { font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--ink-head); }
+  nav .links { display: flex; gap: 26px; align-items:center; }
+  nav a { font-size: 13.5px; color: var(--ink-muted); text-decoration: none; }
+  nav .cta { background: var(--amber); color:#241d3d; padding: 8px 16px; border-radius: 999px; font-weight:600; }
+
+  /* HERO */
+  .hero { padding: 74px 0 78px; }
+  .hero .grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 60px; align-items: center; }
+  .portrait { aspect-ratio: 4/5; border-radius: 14px; overflow: hidden;
+    background: linear-gradient(150deg, #241d3d 0%, #4a2f66 52%, #6b4d9e 100%);
+    display:flex; align-items:center; justify-content:center; position: relative; }
+  .portrait::after { content:''; position:absolute; right:-40px; bottom:-50px; width:220px; height:220px;
+                     border-radius:50%; background: rgba(255,255,255,.06); }
+  .portrait .ph { color: rgba(255,255,255,.62); font-size: 12.5px; letter-spacing:.09em; text-transform:uppercase;
+                  text-align:center; line-height:1.7; z-index:1; }
+  .portrait .ph b { display:block; font-size: 14px; letter-spacing:0; text-transform:none; color:rgba(255,255,255,.85); margin-bottom:6px; }
+  .hero .eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+                   color: var(--accent); margin-bottom: 20px; }
+  .hero h1 { font-family: var(--font-head); font-size: clamp(2.6rem, 5vw, 4rem); line-height: 1.04;
+             letter-spacing: -.015em; font-weight: 600; color: var(--ink-head); }
+  .hero .bio { font-size: 1.09rem; line-height: 1.68; color: var(--ink-muted); margin-top: 24px; max-width: 52ch; }
+
+  /* ═══ METRICS — now on dark ═══ */
+  .metrics { background: var(--plum-900); padding: 76px 0 82px; }
+  .mgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .mcard {
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: var(--r-card);
+    padding: 36px 32px 34px;
+  }
+  .mcard .n { font-family: var(--font-head); font-size: 3.1rem; font-weight: 700; line-height: 1;
+              color: #fff; letter-spacing: -.02em; }
+  .mcard .k { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+              color: var(--amber); margin: 16px 0 12px; }
+  .mcard .t { font-size: .95rem; line-height: 1.62; color: #b6aecb; }
+
+  .mwide {
+    margin-top: 20px; background: var(--plum-600); border-radius: var(--r-card);
+    padding: 38px 42px; display:flex; align-items:center; justify-content:space-between; gap: 30px;
+    cursor:pointer; transition:.18s; border: 1px solid rgba(255,255,255,.10);
+  }
+  .mwide:hover { background: #573a78; }
+  .mwide .l h3 { font-family: var(--font-head); font-size: 1.62rem; font-weight: 600; color:#fff; line-height:1.22; }
+  .mwide .l p { font-size: .97rem; color: #cabbd9; margin-top: 8px; }
+  .mwide .go { background: var(--amber); color:#241d3d; padding: 12px 22px; border-radius: 999px;
+               font-size: 13.5px; font-weight: 700; white-space: nowrap; }
+
+  /* WORK */
+  .work { padding: 82px 0 88px; }
+  .sectionlabel { font-size: 11.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+                  color: var(--ink-faint); margin-bottom: 34px; }
+  .csrow { display: grid; grid-template-columns: 1fr 1fr; gap: 52px; align-items: center; padding: 46px 0;
+           border-top: 1px solid var(--rule); }
+  .csrow:last-child { border-bottom: 1px solid var(--rule); }
+  .csimg { aspect-ratio: 4/3; border-radius: var(--r-card); overflow: hidden; border: 1px solid var(--rule);
+           background: var(--paper-alt); display:flex; align-items:center; justify-content:center; }
+  .csimg .ph { color: var(--ink-faint); font-size: 12.5px; text-align:center; line-height:1.7; padding: 0 20px; }
+  .csimg .ph b { display:block; color: var(--ink-muted); font-size:13.5px; margin-bottom:6px; }
+  .csbody .stat { font-size: 11.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+                  color: var(--accent); display:block; margin-bottom: 14px; }
+  .csbody h3 { font-family: var(--font-head); font-size: clamp(1.6rem, 2.8vw, 2.1rem); font-weight: 600;
+               color: var(--ink-head); line-height: 1.2; letter-spacing:-.012em; margin-bottom: 14px; }
+  .csbody p { font-size: 1.03rem; line-height: 1.66; color: var(--ink-muted); margin-bottom: 26px; max-width: 46ch; }
+  .btn-solid { background: var(--plum-900); color:#fff; padding: 13px 26px; border-radius: 999px;
+               font-size: 13.5px; font-weight: 600; display:inline-block; transition:.16s; }
+  .btn-solid:hover { background: var(--accent); }
+
+  /* CONTACT */
+  .contact { background: var(--plum-900); color:#cdc6dd; padding: 78px 0; }
+  .contact h2 { font-family: var(--font-head); font-size: clamp(1.9rem, 3.4vw, 2.5rem); font-weight: 600;
+                color:#fff; line-height:1.18; margin-bottom: 16px; }
+  .contact p { font-size: 1.04rem; line-height: 1.66; max-width: 54ch; opacity:.84; margin-bottom: 32px; }
+  .btn-amber { background: var(--amber); color:#241d3d; padding: 13px 26px; border-radius: 999px;
+               font-size: 14px; font-weight: 700; display:inline-block; margin-right: 12px; }
+  .btn-ghost { border: 1px solid rgba(255,255,255,.28); color:#fff; padding: 12px 25px; border-radius: 999px;
+               font-size: 14px; font-weight: 600; display:inline-block; }
+
+  footer { background: #14121f; color: #7d7690; padding: 34px 0; font-size: 12.5px; }
+  footer .inner { display:flex; justify-content:space-between; gap: 20px; flex-wrap: wrap; }
+  footer a { color:#9a93ab; text-decoration:none; margin-left: 22px; }
+
+  /* comparison variants */
+  .v24 { --r-card: 24px; }
+  .v24 .mcard { background: var(--plum-700); border-color: rgba(255,255,255,.07); }
+
+  @media (max-width: 880px) {
+    .inner, nav { padding-left: 24px; padding-right: 24px; }
+    .hero .grid, .csrow { grid-template-columns: 1fr; gap: 32px; }
+    .mgrid { grid-template-columns: 1fr; }
+    .mwide { flex-direction: column; align-items: flex-start; }
+    .portrait { aspect-ratio: 3/2; }
+    .wrap { padding-left: 12px; padding-right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <h1>v6 — metrics on dark, rounder cards</h1>
+  <p>Full page with 16px radius, then the same band at 24px with solid card surfaces for comparison.</p>
+</div>
+
+<div class="wrap">
+<div class="page d">
+
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <span class="links"><a href="#">Work</a><a href="#">Philosophy</a><a href="#" class="cta">Get in touch</a></span>
+  </nav>
+
+  <div class="hero dots">
+    <div class="inner"><div class="grid">
+      <div class="portrait"><div class="ph"><b>Portrait photo</b>placeholder<br>images/ramya.jpg</div></div>
+      <div>
+        <div class="eyebrow">Impact-Driven Design Leadership</div>
+        <h1>People.<br>Strategy.<br>Scale.</h1>
+        <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling. I build people-first, inclusive design teams that navigate the ambiguity of AI-first product development, turning technology into clear business outcomes.</p>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="metrics">
+    <div class="inner">
+      <div class="mgrid">
+        <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows Launched</div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div>
+      <div class="mwide">
+        <div class="l">
+          <h3>Strong teams. Strong impact.</h3>
+          <p>Learn about my leadership philosophy</p>
+        </div>
+        <span class="go">Read my philosophy →</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="work">
+    <div class="inner">
+      <div class="sectionlabel">Selected work</div>
+      <div class="csrow">
+        <div class="csimg"><div class="ph"><b>Capacity cover image</b>placeholder — 4:3<br>images/capacity/cover.png</div></div>
+        <div class="csbody">
+          <span class="stat">$1B+ Operational Savings</span>
+          <h3>Transforming Meta's Global Capacity Infra</h3>
+          <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems to keep up with the AI-led capacity demand.</p>
+          <a class="btn-solid">View case study →</a>
+        </div>
+      </div>
+      <div class="csrow">
+        <div class="csimg"><div class="ph"><b>Agentic AI cover image</b>placeholder — 4:3<br>images/agentic-ai/cover.png</div></div>
+        <div class="csbody">
+          <span class="stat">10+ Agentic Workflows Launched</span>
+          <h3>Agentic Workflow Transformation</h3>
+          <p>Defining the UX paradigm for proactive, non-deterministic AI environments.</p>
+          <a class="btn-solid">View case study →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact">
+    <div class="inner">
+      <h2>Let's build what's next.</h2>
+      <p>I'm always open to discussing AI-first product strategy, scaling design orgs, and the future of design.</p>
+      <span class="btn-amber">Email me</span><span class="btn-ghost">LinkedIn</span>
+    </div>
+  </div>
+
+  <footer><div class="inner">
+    <span>© 2026 Ramya Ramaswamy</span>
+    <span><a href="#">Work</a><a href="#">Philosophy</a><a href="#">LinkedIn</a><a href="#">Email</a></span>
+  </div></footer>
+
+</div>
+</div>
+
+<!-- comparison -->
+<div class="band-label">
+  <div class="name">Same band at 24px radius, with solid card surfaces</div>
+  <div class="note">Rounder still, and the cards read as distinct objects rather than tinted panels</div>
+</div>
+<div class="wrap"><div class="page d v24">
+  <div class="metrics">
+    <div class="inner">
+      <div class="mgrid">
+        <div class="mcard"><div class="n">10+</div><div class="k">Teams Directed</div><div class="t">Led a team of 25+ designers and 3+ managers.</div></div>
+        <div class="mcard"><div class="n">10+</div><div class="k">Agentic Workflows Launched</div><div class="t">Transformed 5+ complex products across the ecosystem.</div></div>
+        <div class="mcard"><div class="n">$1B+</div><div class="k">Operational Savings</div><div class="t">Driven entirely through design-led systems solutions.</div></div>
+      </div>
+      <div class="mwide">
+        <div class="l">
+          <h3>Strong teams. Strong impact.</h3>
+          <p>Learn about my leadership philosophy</p>
+        </div>
+        <span class="go">Read my philosophy →</span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+</body>
+</html>

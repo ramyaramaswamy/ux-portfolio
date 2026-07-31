@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v16 — consistency pass</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- serif trimmed to the two weights actually used; the italic axis was being
+     downloaded and never set -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  /* ═══ harness chrome — not part of the design, and no longer an <h1> so it
+         stays out of the page's heading outline ═══ */
+  .chrome-head { background: #1b2337; color: #fff; padding: 22px 32px; position: sticky; top: 0; z-index: 60; }
+  .chrome-head .ct { font-family: 'Source Serif 4', serif; font-size: 19px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .wrap { padding: 26px 32px 44px; }
+  .page { max-width: 1180px; margin: 0 auto; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 14px 38px rgba(0,0,0,.16); }
+
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff;
+
+    /* One dark, not two. --ink-head used to be #1b2337, a navy that sat a shade
+       off the plum used by the dark sections and the outline button. It's now an
+       alias, so heading colour and surface colour can't drift apart again. */
+    --plum-900: #241d3d; --plum-700: #35294f;
+    --ink-head: var(--plum-900);
+    --ink-body: #4a5468; --ink-muted: #78818f; --ink-faint: #9aa4b0;
+    --rule: #e2e5ea;
+
+    --accent: #57398a; --accent-hover: #452c6f;
+    --gold: #d9a521;
+
+    --dot: #d3d6dd;      /* v11's dot colour, unchanged                        */
+    --pool: .42;         /* strength — alpha at the centre of the pool         */
+    --pool-w: 58%;       /* radius — horizontal                                */
+    --pool-h: 30%;       /* radius — vertical                                  */
+    --pool-x: 30%;       /* centre — sits behind the portrait, not page middle */
+
+    --text-body: 1.04rem;  /* every running paragraph — was four sizes between
+                              1.02 and 1.06rem doing the same job */
+
+    /* Vertical rhythm. Every section boundary here is already a colour change, so
+       this padding is internal comfort, not separation — which is why the plum
+       bands run tighter than the light ones: the colour has already done the work.
+       --row-gap matches --band on purpose; when the gap between the two case
+       studies exceeded the section's own padding, the rows read as less related
+       to each other than to the page. */
+    --band: 96px;        /* light content sections            */
+    --band-dark: 80px;   /* the plum bands                    */
+    --band-tight: 32px;  /* footer                            */
+    --hero-top: 56px;
+    --row-gap: 96px;     /* between case study rows           */
+
+    --r-card: 18px;
+    --bleed: 96px;
+    --hero-gap: 64px;    /* clear space between the hero button and the card tops */
+    --portrait-zoom: 1.16;
+    background: var(--paper); color: var(--ink-body); font-family: Inter, sans-serif;
+  }
+
+  /* Structural headings that shouldn't be seen. The work and metrics sections
+     carry no visible label by choice, but without these the document ran
+     h1 → h3 → h3 → h2, which is unnavigable by heading. */
+  .vh { position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+        overflow:hidden; clip-path: inset(50%); white-space:nowrap; border:0; }
+
+  /* ═══════ SKIP LINK ═══════
+     First focusable thing on the page; invisible until tabbed to. Without it every
+     page costs three tab stops through the same nav before reaching any content
+     (WCAG 2.4.1, Level A).
+     position:fixed on focus is load-bearing, not stylistic — .page carries
+     overflow:hidden to clip the case study image bleed, and an absolutely
+     positioned link inside it would be clipped away and never appear. */
+  .skip { position:absolute; left:-9999px; top:0; }
+  .skip:focus-visible {
+    position:fixed; left:16px; top:16px; z-index:100; width:auto; height:auto;
+    background: var(--plum-900); color:#fff; padding:12px 22px; border-radius:999px;
+    font-size:13.5px; font-weight:600; text-decoration:none;
+    box-shadow: 0 6px 22px rgba(20,15,35,.34);
+    outline: 2px solid #fff; outline-offset: 2px;   /* ring flips white — the link's
+                                                       own background is the plum */
+  }
+
+  /* ═══════ THE THREE BUTTON ROLES ═══════
+     Transitions name their properties. The bare `transition: .16s` shorthand meant
+     `all`, which animated the focus ring instead of snapping it on. */
+  .btn { background: var(--accent); color:#fff; padding:13px 26px; border-radius:999px;
+         font-size:13.5px; font-weight:600; display:inline-block; text-decoration:none;
+         transition: background-color .16s, color .16s, border-color .16s; }
+  .btn:hover { background: var(--accent-hover); }
+
+  /* Both outline buttons now share a 1.5px border and 24.5px of padding, so all
+     three roles measure exactly 13px / 26px from edge to text. */
+  .btn-ink { background: transparent; border:1.5px solid var(--plum-900); color: var(--plum-900);
+             padding:11.5px 24.5px; border-radius:999px; font-size:13.5px; font-weight:600;
+             display:inline-block; text-decoration:none;
+             transition: background-color .16s, color .16s, border-color .16s; }
+  .btn-ink:hover { background: var(--plum-900); color:#fff; }
+
+  .btn-on-dark { background: transparent; border:1.5px solid rgba(255,255,255,.55); color:#fff;
+                 padding:11.5px 24.5px; border-radius:999px; font-size:13.5px; font-weight:600;
+                 display:inline-block; text-decoration:none;
+                 transition: background-color .16s, color .16s, border-color .16s; }
+  .btn-on-dark:hover { background: rgba(255,255,255,.12); border-color:#fff; }
+
+  /* ═══════ KEYBOARD FOCUS ═══════
+     :focus-visible, not :focus — the ring appears for Tab and stays away on click.
+     Offset by 3px so it clears the pill radius, which also makes the ring's
+     adjacent colour the background rather than the button.
+     Ink by default: 15.9:1 on paper, 7.1:1 on the gold block, 6.2:1 on the darkest
+     point of the pool. Gold was considered and fails at 2.2:1 on paper. */
+  :focus-visible { outline: 2px solid var(--plum-900); outline-offset: 3px; }
+
+  /* Flipped on the two near-black sections. Deliberately not on .metrics: the only
+     focusable thing there is the button on the gold block, and white on gold is 2.2:1. */
+  .contact :focus-visible,
+  footer   :focus-visible { outline-color: #ffffff; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .inner      { max-width: 1000px; margin: 0 auto; padding: 0 56px; }
+  .inner-wide { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+
+  /* DOM order is wordmark → toggle → links → CTA, which is deliberate. It's the one
+     order that tabs correctly in both layouts: on desktop the toggle is hidden so
+     you get Work → Philosophy → CTA, and on mobile the panel follows immediately
+     after the button that opens it. `order` handles the visual arrangement. */
+  nav { display:flex; align-items:center; flex-wrap:wrap; column-gap:26px;
+        padding: 18px 56px; border-bottom: 1px solid var(--rule); background: var(--paper);
+        position:relative; z-index:10; }
+  nav .wordmark { order:1; margin-right:auto;
+                  font-family: var(--font-head); font-weight: 700; font-size: 16px; color: var(--ink-head); }
+  /* .links is a wrapper; .links-inner holds the actual row. The extra element is
+     what makes the mobile open/close animatable — see the 0fr→1fr collapse below. */
+  nav .links { order:2; }
+  nav .links-inner { display:flex; gap:26px; align-items:center; }
+  nav .btn { order:3; padding:9px 20px; font-size:13px; }
+  nav .navtoggle { order:4; }
+  /* :not(.btn) is load-bearing. `nav a` is (0,1,1) and `.btn` is (0,1,0), so without
+     it these rules override the button's own white text — at rest as well as on
+     hover, giving 2.26:1 and 1.28:1 respectively. Excluding .btn lets the button
+     keep its own colour and darken-on-hover like every other primary button. */
+  nav a:not(.btn) { font-size:13.5px; color: var(--ink-muted); text-decoration:none;
+                    transition: color .16s; }
+  nav a:not(.btn):hover { color: var(--accent); }
+
+  /* ═══════ NAV TOGGLE ═══════
+     Hidden above 900px. aria-expanded is the single source of truth — it drives
+     the screen reader announcement *and* the CSS, via nav:has(...) below, so the
+     two can't drift. The bars morph into an X on open. */
+  .navtoggle { display:none; background:none; border:0; cursor:pointer;
+               padding:10px; margin:-10px; line-height:0; }
+  .navtoggle .bars { position:relative; }
+  .navtoggle .bars,
+  .navtoggle .bars::before,
+  .navtoggle .bars::after { display:block; width:21px; height:1.5px;
+                            background: var(--plum-900); border-radius:2px;
+                            transition: transform .2s ease, background-color .2s ease; }
+  .navtoggle .bars::before { content:''; position:absolute; top:-6.5px; }
+  .navtoggle .bars::after  { content:''; position:absolute; top:6.5px; }
+  .navtoggle[aria-expanded="true"] .bars { background: transparent; }
+  .navtoggle[aria-expanded="true"] .bars::before { transform: translateY(6.5px) rotate(45deg); }
+  .navtoggle[aria-expanded="true"] .bars::after  { transform: translateY(-6.5px) rotate(-45deg); }
+
+  /* ═══ HERO ═══ */
+  .hero { padding: var(--hero-top) 0 0; position: relative; }
+  .hero-bg {
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      radial-gradient(circle, var(--dot) 1px, transparent 1px),
+      radial-gradient(ellipse var(--pool-w) var(--pool-h) at var(--pool-x) 100%,
+                      rgba(36,29,61,var(--pool)), rgba(36,29,61,0) 74%);
+    background-size: 22px 22px, auto;
+    background-repeat: repeat, no-repeat;
+  }
+  .hero > .inner { position:relative; z-index:2; }
+
+  .herogrid { display:grid; grid-template-columns:.9fr 1.1fr; gap:48px; align-items:end; }
+
+  .portrait { display:flex; align-items:flex-end; justify-content:center; }
+  /* Scaled rather than widened, and anchored at the bottom: her feet stay on the
+     card line while only her head rises. Widening the column instead would have
+     taken the width out of the text. */
+  .portrait img { width:100%; max-width:430px; height:auto; display:block;
+                  transform: scale(var(--portrait-zoom)); transform-origin: bottom center; }
+
+  /* the cards rise --bleed into the hero, so the real gap below the button is
+     this padding minus --bleed — hence adding the two rather than setting one */
+  .herotext { padding-bottom: calc(var(--bleed) + var(--hero-gap)); }
+  /* the one all-caps left on the page, kept deliberately */
+  .herotext .eyebrow { font-size:11.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+                       color: var(--accent); margin-bottom:18px; }
+  .herotext h1 { font-family: var(--font-head); font-size: clamp(2.5rem,4.8vw,3.8rem); line-height:1.04;
+                 letter-spacing:-.015em; font-weight:600; color: var(--ink-head); }
+  .herotext .bio { font-size: var(--text-body); line-height:1.68; color: var(--ink-muted);
+                   margin-top:30px; max-width:50ch; }
+  .herotext .btns { margin-top: 30px; }
+
+  /* currentColor, not a literal — the stroke was hardcoded #d9a521 in both SVGs,
+     so changing --gold would have left the two drawn marks behind. */
+  .markword { position:relative; display:inline-block; }
+  .markword svg { position:absolute; left:-5%; bottom:-16px; width:110%; height:22px;
+                  overflow:visible; pointer-events:none; color: var(--gold); }
+
+  /* ═══ METRICS ═══ */
+  /* top stays 0 — the cards bleed up into the hero, so --bleed sets that edge */
+  .metrics { background: var(--plum-900); padding: 0 0 var(--band-dark); display: flow-root; }
+  .mgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+           margin-top: calc(var(--bleed) * -1); position:relative; z-index:5; }
+  .mcard { background: var(--plum-700); border-radius: var(--r-card); padding: 32px 28px 30px;
+           box-shadow: 0 18px 40px rgba(20,15,35,.34); }
+  .mcard .n { font-family: var(--font-head); font-size: 3.1rem; font-weight:700; line-height:1;
+              color: var(--gold); letter-spacing:-.02em; }
+  .mcard .k { font-size: 1.02rem; font-weight:600; color:#fff; margin-top: 14px; }
+  .mcard .rule { width:44px; height:2px; background: rgba(255,255,255,.28); margin: 16px 0; }
+  .mcard .t { font-size:.9rem; line-height:1.6; color:#a79fbd; }
+
+  /* hover removed: the block lightened on hover but only the button inside it was
+     ever a link, so it was promising something it couldn't do */
+  .mwide { margin-top:20px; background: var(--gold); border-radius: var(--r-card);
+           padding: 36px 40px; display:flex; align-items:center; justify-content:space-between; gap:28px;
+           position:relative; z-index:5; }
+  .mwide h3 { font-family: var(--font-head); font-size:1.6rem; font-weight:600; color: var(--plum-900); line-height:1.22; }
+  .mwide p { font-size:.96rem; color: rgba(36,29,61,.74); margin-top:8px; }
+
+  /* ═══ WORK — alternating, image bleeds off the outer page edge ═══ */
+  .work { padding: var(--band) 0; }
+  .worklist { max-width: 1180px; margin: 0 auto; }
+  .csrow { display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:0; }
+  .csrow + .csrow { margin-top: var(--row-gap); }
+
+  .csimg { aspect-ratio:4/3; overflow:hidden; display:flex; align-items:center; justify-content:center;
+           background: linear-gradient(150deg,#eceaf1 0%,#e3e0ea 55%,#dcd9e6 100%);
+           text-decoration:none; }
+  .csimg img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .45s ease; }
+  .csrow:hover .csimg img { transform: scale(1.035); }
+  .csimg .ph { color:#6b6480; font-size:12.5px; text-align:center; line-height:1.8; padding:0 24px; }
+  .csimg .ph b { display:block; color: var(--plum-700); font-size:14px; margin-bottom:7px; font-weight:600; }
+
+  .csrow:nth-child(odd)  .csimg  { border-radius: 0 var(--r-card) var(--r-card) 0; }
+  /* outer padding pulled in from 146px to make room for three metrics across */
+  .csrow:nth-child(odd)  .csbody { padding-left: 64px; padding-right: clamp(24px,5vw,100px); }
+  .csrow:nth-child(even) .csimg  { border-radius: var(--r-card) 0 0 var(--r-card); order:2; }
+  .csrow:nth-child(even) .csbody { order:1; padding-right: 64px; padding-left: clamp(24px,5vw,100px); }
+
+  /* title → description → metrics → button */
+  .csbody h3 { font-family: var(--font-head); font-size: clamp(1.65rem,2.9vw,2.15rem); font-weight:600;
+               color: var(--ink-head); line-height:1.2; letter-spacing:-.012em; margin-bottom:16px; }
+  .csbody h3 a { color: inherit; text-decoration: none; transition: color .16s; }
+  .csbody h3 a:hover { color: var(--accent); }
+  .csbody p { font-size: var(--text-body); line-height:1.66; color: var(--ink-muted);
+              margin-bottom:32px; max-width:46ch; }
+
+  /* Three across, divided by hairlines. grid-auto-flow:column so the track count
+     follows the number of metrics — a case study with two would get two columns,
+     not three with a hole. Column gap is 0; the padding either side of each
+     divider does the spacing, which keeps the line centred in the gutter.
+     Values are ink, not gold: #d9a521 on paper is ~2.2:1, under the 3:1 floor. */
+  .csmetrics { display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
+               margin-bottom:34px; }
+  .csmetrics > div { padding-right:18px; }
+  .csmetrics > div + div { padding-left:18px; border-left:1px solid var(--rule); }
+  .csmetrics > div:last-child { padding-right:0; }
+  .csmetrics .v { font-family: var(--font-head); font-size:1.5rem; font-weight:700; line-height:1.05;
+                  color: var(--ink-head); letter-spacing:-.02em;
+                  display:flex; align-items:baseline; gap:5px; flex-wrap:wrap; }
+  /* A metric can be a single value or a before → after. Both figures carry full ink;
+     only the connecting arrow is lighter, so it separates without demoting a number. */
+  .csmetrics .from  { color: var(--ink-head); font-weight:700; }
+  .csmetrics .arrow { color: var(--ink-faint); font-family: Inter, sans-serif;
+                      font-size:.78em; font-weight:500; }
+  .csmetrics .l { font-size:12.5px; font-weight:400; color: var(--ink-muted);
+                  margin-top:9px; line-height:1.45; }
+
+  .contact { background: var(--plum-900); color:#cdc6dd; padding: var(--band-dark) 0; }
+  .contact h2 { font-family: var(--font-head); font-size: clamp(1.9rem,3.4vw,2.5rem); font-weight:600;
+                color:#fff; line-height:1.18; margin-bottom:26px; }
+  /* same drawn stroke as the hero, scaled for the smaller heading — the page opens
+     and closes on the one gesture */
+  .contact .markword svg { bottom:-11px; height:16px; }
+  .contact p { font-size: var(--text-body); line-height:1.66; max-width:54ch; opacity:.84; margin-bottom:32px; }
+  .contact .btn-on-dark + .btn-on-dark { margin-left:12px; }
+
+  footer { background:#14121f; color:#7d7690; padding: var(--band-tight) 0; font-size:12.5px; }
+  footer .inner { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  footer a { color:#9a93ab; text-decoration:none; margin-left:22px; transition: color .16s; }
+  footer a:hover { color:#ffffff; }
+
+  @media (max-width: 900px) {
+    /* Rhythm re-declared once, at roughly two-thirds. --row-gap is the deliberate
+       exception: the case studies become cards here, and cards in a list sit far
+       closer than full-bleed sections do. */
+    .d { --band: 64px; --band-dark: 56px; --band-tight: 28px;
+         --hero-top: 40px; --row-gap: 24px;
+         --circle: min(126px, 34vw);
+         --bleed: 0px; --portrait-zoom: 1; }   /* no zoom at one column — she'd grow into the nav */
+    .inner, .inner-wide, nav { padding-left:22px; padding-right:22px; }
+
+    /* ═══ NAV collapses to a hamburger ═══
+       The panel sits in normal flow at flex-basis:100%, so it wraps onto a second
+       line inside the nav and pushes the page down rather than floating over it.
+       The CTA stays out in the bar; only Work and Philosophy go in the panel.
+       Closed, .links is display:none, which also takes those links out of the tab
+       order — the behaviour you want.
+       Every rule here is scoped with `nav` on purpose. The base stylesheet sets
+       `nav .links { display:flex }` at (0,1,1); an unscoped `.links` is (0,1,0)
+       and loses to it, which left the panel permanently open. Keep the prefix. */
+    nav { column-gap:14px; }
+    nav .navtoggle { display:block; }
+    nav .btn { order:2; padding:8px 15px; font-size:12.5px; }
+    /* Animated collapse. display:none can't be transitioned, so the panel is a
+       one-row grid whose track goes 0fr → 1fr — that animates real height without
+       anything having to know what the height is, which keeps the page-push smooth.
+       visibility carries the accessibility side: hidden takes the links out of the
+       tab order, and its transition is delayed to 0s so it only flips back after
+       the collapse has finished. The 14px of breathing room is padding on the
+       inner element rather than margin on the outer, so it collapses too. */
+    nav .links { order:4; flex-basis:100%; margin:0 -22px;
+                 display:grid; grid-template-rows:0fr; overflow:hidden;
+                 visibility:hidden; opacity:0;
+                 transition: grid-template-rows .3s ease, opacity .22s ease,
+                             visibility 0s linear .3s; }
+    nav:has(.navtoggle[aria-expanded="true"]) .links {
+                 grid-template-rows:1fr; visibility:visible; opacity:1;
+                 transition: grid-template-rows .3s ease, opacity .22s ease .05s,
+                             visibility 0s linear 0s; }
+    nav .links-inner { min-height:0; overflow:hidden; padding-top:14px;
+                       display:flex; flex-direction:column; align-items:stretch; gap:0; }
+    nav .links a { padding:15px 22px; font-size:15px; color: var(--ink-head); }
+    nav .links a + a { border-top:1px solid var(--rule); }  /* between items only */
+    /* ring drawn inside the link — the panel's overflow:hidden would clip a 3px
+       outset ring on the left and right edges */
+    nav .links a:focus-visible { outline-offset:-3px; }
+
+    .herogrid { grid-template-columns:1fr; gap:26px; }
+    .herotext { padding-bottom: 0; }
+    .hero { padding-bottom: var(--hero-top); }
+
+    /* ═══ PORTRAIT — filled circle, face only ═══
+       The cut-out is transparent, so the circle has to be filled or there is no
+       circle, just a floating head. That tint also takes over the grounding job
+       from the light pool, which is switched off below.
+       Crop on the source is the 660px square 538,70 → 1198,730, centred on the
+       head — measured: the head runs y118–700 at x664–1074, widening into
+       shoulders below that. The three figures are just that box expressed against
+       the circle: 1792/660, −538/660, −70/660. Percentages, so they hold at any
+       circle size. */
+    .portrait { display:block; position:relative; overflow:hidden; margin:0;
+                width: var(--circle); height: var(--circle); border-radius:50%;
+                background: rgba(36,29,61,.08); }
+    .portrait img { position:absolute; max-width:none; height:auto;
+                    width:271.5%; left:-81.5%; top:-10.6%; transform:none; }
+
+    /* dots only — the pool comes off, the circle tint grounds her instead */
+    .hero-bg {
+      background-image: radial-gradient(circle, var(--dot) 1px, transparent 1px);
+      background-size: 22px 22px;
+      background-repeat: repeat;
+    }
+
+    /* the cards no longer bleed at one column, so the band needs its own top edge */
+    .metrics { padding-top: var(--band-dark); }
+    .mgrid { grid-template-columns:1fr; margin-top:0; }
+    .mwide { flex-direction:column; align-items:flex-start; }
+
+    /* ═══ WORK — each case study becomes a card ═══
+       The row itself is the card: image flush to the top edge, text below, the
+       whole thing clipped by the card radius. gap:0 so the two halves meet. */
+    .csrow { grid-template-columns:1fr; gap:0;
+             margin-left:22px; margin-right:22px;
+             background: var(--paper); border:1px solid var(--rule);
+             border-radius: var(--r-card); overflow:hidden;
+             box-shadow: 0 1px 2px rgba(36,29,61,.04), 0 10px 24px rgba(36,29,61,.05); }
+    .csrow:nth-child(odd)  .csimg,
+    .csrow:nth-child(even) .csimg  { border-radius:0; order:1; margin:0; }
+    .csrow:nth-child(odd)  .csbody,
+    .csrow:nth-child(even) .csbody { order:2; padding:26px 22px 28px; }
+    /* still three across with the dividers, but tighter — the card leaves ~300px
+       for three columns, so the gutters and the values both come down */
+    .csmetrics { margin-bottom:28px; }
+    .csmetrics > div { padding-right:10px; }
+    .csmetrics > div + div { padding-left:10px; }
+    .csmetrics .v { font-size:1.15rem; }
+    .wrap { padding-left:10px; padding-right:10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <div class="ct">v16 — consistency pass</div>
+  <p>One dark (plum) · sentence case in the metric cards · clickable titles and images · heading outline repaired · scoped transitions.</p>
+</div>
+
+<div class="wrap">
+<div class="page d">
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <nav>
+    <span class="wordmark">Ramya Ramaswamy</span>
+    <button class="navtoggle" type="button" aria-expanded="false" aria-controls="navmenu" aria-label="Menu">
+      <span class="bars" aria-hidden="true"></span>
+    </button>
+    <span class="links" id="navmenu"><span class="links-inner"><a href="#">Work</a><a href="#">Philosophy</a></span></span>
+    <a href="#" class="btn">Get in touch</a>
+  </nav>
+
+  <main id="main" tabindex="-1">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="inner"><div class="herogrid">
+      <div class="portrait">
+        <img src="../Home page/1_Ramya_Portrait_cutout.png" alt="Ramya Ramaswamy">
+      </div>
+      <div class="herotext">
+        <div class="eyebrow">Impact-Driven Design Leadership</div>
+        <h1>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg></span></h1>
+        <p class="bio">I'm a Director of Product Design who leads design at scale in complex product ecosystems. My work centers on product vision, strategy, and storytelling.</p>
+        <div class="btns"><a href="#" class="btn">View case studies ↓</a></div>
+      </div>
+    </div></div>
+  </section>
+
+  <section class="metrics">
+    <h2 class="vh">By the numbers</h2>
+    <div class="inner-wide">
+      <div class="mgrid">
+        <div class="mcard">
+          <div class="n">10+</div>
+          <div class="k">Teams directed</div>
+          <div class="rule"></div>
+          <div class="t">Led a team of 25+ designers and 3+ managers.</div>
+        </div>
+        <div class="mcard">
+          <div class="n">10+</div>
+          <div class="k">Agentic workflows launched</div>
+          <div class="rule"></div>
+          <div class="t">Transformed 5+ complex products across the ecosystem.</div>
+        </div>
+        <div class="mcard">
+          <div class="n">$1B+</div>
+          <div class="k">Operational savings</div>
+          <div class="rule"></div>
+          <div class="t">Driven entirely through design-led systems solutions.</div>
+        </div>
+      </div>
+
+      <div class="mwide">
+        <div>
+          <h3>Strong teams. Strong impact.</h3>
+          <p>Learn about my leadership philosophy</p>
+        </div>
+        <a href="#" class="btn-ink">Read my philosophy →</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="work">
+    <h2 class="vh">Selected work</h2>
+    <div class="worklist">
+
+      <div class="csrow">
+        <a class="csimg" href="#" tabindex="-1" aria-hidden="true"><div class="ph"><b>Capacity cover image</b>images/capacity/cover.png<br>4:3 — needs making</div></a>
+        <div class="csbody">
+          <h3><a href="#">Transforming Meta's Global Capacity Infra</a></h3>
+          <p>Turning complex, massive-scale compute allocation into intuitive, future-proof ecosystems to keep up with the AI-led capacity demand.</p>
+          <div class="csmetrics">
+            <div>
+              <div class="v"><span class="from">0</span><span class="arrow">→</span>$1B+</div>
+              <div class="l">Savings</div>
+            </div>
+            <div>
+              <div class="v"><span class="from">10</span><span class="arrow">→</span>25</div>
+              <div class="l">Designers</div>
+            </div>
+            <div>
+              <div class="v">10+ GW</div>
+              <div class="l">Capacity</div>
+            </div>
+          </div>
+          <a href="#" class="btn">View case study →</a>
+        </div>
+      </div>
+
+      <div class="csrow">
+        <a class="csimg" href="#" tabindex="-1" aria-hidden="true"><div class="ph"><b>Agentic AI cover image</b>images/agentic-ai/cover.png<br>4:3 — needs making</div></a>
+        <div class="csbody">
+          <h3><a href="#">Agentic Workflow Transformation</a></h3>
+          <p>Defining the UX paradigm for proactive, non-deterministic AI environments.</p>
+          <div class="csmetrics">
+            <div>
+              <div class="v"><span class="from">1</span><span class="arrow">→</span>10</div>
+              <div class="l">Workflows</div>
+            </div>
+            <div>
+              <div class="v">75%</div>
+              <div class="l">Time saved</div>
+            </div>
+            <div>
+              <div class="v">95%</div>
+              <div class="l">Accuracy</div>
+            </div>
+          </div>
+          <a href="#" class="btn">View case study →</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="contact">
+    <div class="inner">
+      <h2>Let's build what's <span class="markword">next.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg></span></h2>
+      <p>I'm always open to discussing AI-first product strategy, scaling design orgs, and the future of design.</p>
+      <a href="#" class="btn-on-dark">Email me</a><a href="#" class="btn-on-dark">LinkedIn</a>
+    </div>
+  </section>
+
+  </main>
+
+  <footer><div class="inner">
+    <span>© 2026 Ramya Ramaswamy</span>
+    <span><a href="#">Work</a><a href="#">Philosophy</a><a href="#">LinkedIn</a><a href="#">Email</a></span>
+  </div></footer>
+
+</div>
+</div>
+
+<script>
+  // Nav toggle. aria-expanded is the state — the CSS reads it too, so there is no
+  // separate class to keep in step.
+  (function () {
+    var btn  = document.querySelector('.navtoggle');
+    var menu = document.getElementById('navmenu');
+    if (!btn || !menu) return;
+
+    var isOpen = function () { return btn.getAttribute('aria-expanded') === 'true'; };
+    var setOpen = function (open) { btn.setAttribute('aria-expanded', open ? 'true' : 'false'); };
+
+    btn.addEventListener('click', function () { setOpen(!isOpen()); });
+
+    // Escape closes and hands focus back to the button, rather than stranding it
+    // inside a menu that has just been hidden.
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (isOpen() && !menu.contains(e.target) && !btn.contains(e.target)) setOpen(false);
+    });
+
+    menu.addEventListener('click', function (e) {
+      if (e.target.closest('a')) setOpen(false);
+    });
+  })();
+</script>
+
+</body>
+</html>

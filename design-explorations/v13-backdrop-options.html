@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v13 — quieter backdrop options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; color: #4a5468; }
+
+  :root {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff; --paper-alt: #f7f7f5;
+    --ink-head: #1b2337; --ink-muted: #78818f; --rule: #e2e5ea;
+    --plum-900: #241d3d; --accent: #57398a; --gold: #d9a521;
+  }
+
+  .chrome { background:#1b2337; color:#fff; padding:26px 34px; position:sticky; top:0; z-index:80; }
+  .chrome h1 { font-family: var(--font-head); font-size:20px; font-weight:600; }
+  .chrome p { font-size:13px; color:#9aa4b8; margin-top:6px; max-width:80ch; line-height:1.65; }
+
+  .sheet { max-width:1300px; margin:0 auto; padding:34px 24px 90px; }
+  .intro { background:var(--paper); border-radius:8px; padding:26px 32px; margin-bottom:28px;
+           box-shadow:0 1px 2px rgba(0,0,0,.09), 0 10px 30px rgba(0,0,0,.10); }
+  .intro h2 { font-family:var(--font-head); font-size:1.35rem; color:var(--ink-head); font-weight:600; margin-bottom:10px; }
+  .intro p { font-size:.94rem; line-height:1.7; color:var(--ink-muted); max-width:82ch; }
+  .intro p + p { margin-top:10px; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+
+  .opt { background:var(--paper); border-radius:12px; overflow:hidden;
+         box-shadow:0 1px 2px rgba(0,0,0,.09), 0 8px 24px rgba(0,0,0,.10); }
+  .opt > .cap { padding:15px 20px; border-bottom:1px solid var(--rule); }
+  .opt > .cap .n { font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.09em;
+                   color:var(--accent); text-transform:uppercase; }
+  .opt > .cap b { display:block; color:var(--ink-head); font-size:1rem; font-weight:600; margin:5px 0 4px; }
+  .opt > .cap span { color:var(--ink-muted); font-size:.85rem; line-height:1.55; display:block; }
+  .rec { display:inline-block; font-size:9.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+         color:#1c6b4a; background:#dff3e8; padding:2px 8px; border-radius:999px; margin-left:6px; vertical-align:2px; }
+
+  /* ═══ the mini hero every option shares ═══ */
+  .stage { position:relative; background:var(--paper); overflow:hidden; min-height:355px;
+           display:flex; align-items:flex-end; padding:26px 22px 0; }
+  .stage .layer { position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .stage .fg { position:relative; z-index:3; display:grid; grid-template-columns:.92fr 1.08fr;
+               gap:14px; align-items:end; width:100%; }
+  .stage .fg img { width:100%; max-width:168px; display:block; }
+  .stage .fg .copy { padding-bottom:34px; }
+  .stage .fg .copy .eyebrow { font-size:8.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+                              color:var(--accent); margin-bottom:9px; }
+  .stage .fg .copy h3 { font-family:var(--font-head); font-size:1.62rem; line-height:1.05; font-weight:600;
+                        color:var(--ink-head); letter-spacing:-.015em; }
+  .markword { position:relative; display:inline-block; }
+  .markword svg { position:absolute; left:-5%; bottom:-9px; width:110%; height:14px; overflow:visible; }
+
+  /* ─── i. nothing ─── */
+
+  /* ─── ii. grounding shadow ─── */
+  .l-shadow { background: radial-gradient(ellipse 42% 7% at 27% 99%, rgba(36,29,61,.28), rgba(36,29,61,0) 70%); }
+
+  /* ─── iii. tonal panel ─── */
+  .l-panel { background: linear-gradient(90deg, #f1f0f4 0%, #f1f0f4 47%, transparent 47%); }
+
+  /* ─── iv. soft vertical wash ─── */
+  .l-wash { background: linear-gradient(180deg, #ffffff 30%, #f0eff3 100%); }
+
+  /* ─── v. single arc ─── */
+  .l-arc::before { content:''; position:absolute; width:300px; height:300px; border-radius:50%;
+                   background:#eeedf2; left:2%; bottom:-92px; }
+
+  /* ─── vi. faded dots ─── */
+  .l-dots { background-image: radial-gradient(circle,#d3d6dd 1px,transparent 1px); background-size:22px 22px;
+            -webkit-mask-image: linear-gradient(100deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.35) 40%, transparent 68%);
+            mask-image: linear-gradient(100deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.35) 40%, transparent 68%); }
+
+  .foot { background:var(--paper); border-radius:8px; padding:26px 32px; margin-top:28px;
+          box-shadow:0 1px 2px rgba(0,0,0,.09), 0 10px 30px rgba(0,0,0,.10); }
+  .foot h2 { font-family:var(--font-head); font-size:1.25rem; color:var(--ink-head); font-weight:600; margin-bottom:10px; }
+  .foot p { font-size:.92rem; line-height:1.7; color:var(--ink-muted); max-width:82ch; }
+  .foot p + p { margin-top:10px; }
+  .foot b { color:var(--ink-head); }
+
+  @media (max-width:1080px){ .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <h1>v13 — quieter backdrops</h1>
+  <p>The contours are out. Six alternatives, ordered from nothing at all to the most texture I'd still
+     be comfortable putting behind a face. Everything else on the page is v12 as built.</p>
+</div>
+
+<div class="sheet">
+
+  <div class="intro">
+    <h2>What I think the backdrop is actually for</h2>
+    <p>The contours failed because they were <b>lines</b>, and lines behind a face read as competition —
+       your eye keeps trying to resolve them. Density wasn't the problem; the medium was.</p>
+    <p>Which reframes the job. The hero's real weakness isn't that it's empty — it's that the portrait is a
+       cut-out standing on nothing. She floats, and then stops. So the useful backdrop is one that
+       <b>grounds</b> her, not one that decorates the space. That's why the first four options below are all
+       tone and no pattern.</p>
+  </div>
+
+  <div class="grid">
+
+    <!-- i -->
+    <div class="opt">
+      <div class="cap">
+        <div class="n">i</div>
+        <b>Nothing</b>
+        <span>Plain paper. The control — worth seeing before you add anything, because it may already be fine.</span>
+      </div>
+      <div class="stage">
+        <div class="fg">
+          <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+          <div class="copy">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h3>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ii -->
+    <div class="opt">
+      <div class="cap">
+        <div class="n">ii</div>
+        <b>Grounding shadow<span class="rec">minimal pick</span></b>
+        <span>A soft ellipse under her feet and nothing else. Solves the floating without adding a single visible element.</span>
+      </div>
+      <div class="stage">
+        <div class="layer l-shadow"></div>
+        <div class="fg">
+          <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+          <div class="copy">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h3>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iii -->
+    <div class="opt">
+      <div class="cap">
+        <div class="n">iii</div>
+        <b>Tonal panel<span class="rec">my pick</span></b>
+        <span>Her half of the hero sits on a pale gray panel, hard vertical edge. Structural, not decorative — and it gives the black silhouette something to sit against.</span>
+      </div>
+      <div class="stage">
+        <div class="layer l-panel"></div>
+        <div class="fg">
+          <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+          <div class="copy">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h3>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- iv -->
+    <div class="opt">
+      <div class="cap">
+        <div class="n">iv</div>
+        <b>Soft vertical wash</b>
+        <span>White at the top settling to pale gray at the base. Grounds the whole hero rather than just her, with no edge anywhere.</span>
+      </div>
+      <div class="stage">
+        <div class="layer l-wash"></div>
+        <div class="fg">
+          <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+          <div class="copy">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h3>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- v -->
+    <div class="opt">
+      <div class="cap">
+        <div class="n">v</div>
+        <b>Single arc</b>
+        <span>One large pale circle behind her, cropped by the bottom edge. A shape rather than a pattern — nothing to resolve.</span>
+      </div>
+      <div class="stage">
+        <div class="layer l-arc"></div>
+        <div class="fg">
+          <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+          <div class="copy">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h3>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- vi -->
+    <div class="opt">
+      <div class="cap">
+        <div class="n">vi</div>
+        <b>Faded dots</b>
+        <span>v11's dot grid, but masked so it dies out before it reaches the headline. Texture only where nothing has to be read.</span>
+      </div>
+      <div class="stage">
+        <div class="layer l-dots"></div>
+        <div class="fg">
+          <img src="../Home page/1_Ramya_Portrait.png" alt="Ramya Ramaswamy">
+          <div class="copy">
+            <div class="eyebrow">Impact-Driven Design Leadership</div>
+            <h3>People.<br>Strategy.<br><span class="markword">Scale.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="#d9a521" stroke-width="3.4" stroke-linecap="round"/></svg></span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <h2>How I'd read these</h2>
+    <p><b>iii — tonal panel</b> is where I'd land. It's the only one that does structural work: it separates
+       portrait from message, gives the black outfit something to sit against instead of dissolving into white,
+       and it costs one gradient. It also scales — the same panel edge can reappear on the case study pages.</p>
+    <p><b>ii — grounding shadow</b> if you want the page to stay essentially white. It fixes the floating problem
+       and nothing else, which may be exactly right.</p>
+    <p>These combine, incidentally: <b>iii + ii</b> together gives a panel to sit against <em>and</em> weight
+       at her feet. Say the word and I'll show that pairing.</p>
+    <p>Fair warning on <b>vi</b> — it's the closest to what you already rejected. Masked or not, it's still a
+       pattern behind a face. I've included it because it's the option that keeps continuity with v11, not
+       because I think it wins.</p>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Local tooling config
+.claude/
+
+# Raw source imagery — ~2.1 GB of working files, kept locally only.
+# GitHub rejects any file over 100 MB and warns above 1 GB per repo.
+Raw - TV pics/
+Raw - capacity pngs/
+Raw - Designing with AI PNG/
+AI Workflows PNGs/
+
+# Case study slide exports — large, and not site assets in their current form
+Capacity Case Study/
+Agentic AI Case Study/
+
+# Portrait source files. NOTE: the design explorations reference
+# Home page/1_Ramya_Portrait_cutout.png — un-ignore that one file if the pages
+# need to render on GitHub rather than only locally.
+Home page/
+
+# Debug artefact written by tools/portrait-cutout.py
+tools/verify-cutout.png
