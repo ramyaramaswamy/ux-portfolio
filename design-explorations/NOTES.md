@@ -16,10 +16,13 @@ the spec**, using `home-v16.html` as the reference for tokens and components, th
 
 ## Still open
 
-- **The two case study cover images don't exist.** The files in `Capacity Case Study/` and
-  `Agentic AI Case Study/` are full annotated presentation slides — title, browser mock,
-  callout cards — not covers. There is no 4:3 crop of those that isn't a mess. v16 ships
-  tinted placeholders. This is the only real blocker.
+- **Capacity cover: done.** `images/capacity/cover.png` — the light, plum-tinted 4:3 crop
+  whose dot ground matches the hero. A dark-plum 2× alternate is kept beside it as
+  `cover-dark.png`. Note the live one is 1200×900, which is only 1× at the desktop display
+  size (~590 CSS px per column); a 2× export would be sharper on retina.
+- **Agentic AI cover still doesn't exist** — that row still ships a tinted placeholder.
+  The files in `Agentic AI Case Study/` are full annotated presentation slides, not covers,
+  and there's no 4:3 crop of them that isn't a mess.
 - **Copy lengths are lopsided.** The Agentic description is one line against Capacity's
   three, so the two rows sit at visibly different heights. A copy fix, not a layout one.
 - **The two contact buttons are identical white outlines**, so the page's primary action
