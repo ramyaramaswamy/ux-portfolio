@@ -197,11 +197,33 @@
   .introbody .summary + .summary { margin-top:18px; }
 
   /* The marker device from the reference, in this palette's gold. Gold can't be
-     *text* on paper at 2.2:1, but as a wash behind ink it's decoration and the
-     text on it still clears 12:1. Reserved for figures and outcomes - if it
-     highlights sentences it stops meaning anything. */
-  mark { background: rgba(217,165,33,.30); color: inherit;
-         padding:.08em .2em; border-radius:2px; }
+     *text* on paper at 2.2:1, but as a wash behind ink it's decoration.
+     Two changes now that it carries real weight on the page:
+     colour is SET rather than inherited - the wash renders #F4E4BC on paper,
+     where ink clears 12.6:1 while the body grey it used to inherit manages 6.0:1
+     (AA but not AAA), and a phrase singled out as important shouldn't be the
+     least legible thing in its own paragraph.
+     And medium, because the wash on its own reads as a colour accident at a
+     glance; the weight is what says this was chosen rather than left over.
+     500 rather than 600 - the prose already runs <strong> at 600 in several
+     places, so a highlight at the same weight competed with it instead of
+     sitting a step above the body. The wash is doing most of the work here;
+     the weight only has to lean.
+     Reserved for figures and outcomes - five on a 2,400-word page, roughly one
+     per act. It never marks a whole explanatory sentence, because a highlight
+     that covers the argument stops pointing at anything inside it. And it never
+     appears on plum: the wash is mixed for paper, and the dark bands already
+     have gold doing this job in their metric values.
+
+     Horizontal padding is .12em, not .2em: any right padding opens a gap
+     between the wash and whatever punctuation follows, and at .2em a
+     sentence-final period visibly detached from its own sentence. And
+     box-decoration-break:clone so a highlight that wraps gets its padding and
+     radius on both fragments - the default slices them, leaving the second
+     line flush-left against the wash edge. */
+  mark { background: rgba(217,165,33,.30); color: var(--ink-head); font-weight:500;
+         padding:.08em .12em; border-radius:2px;
+         -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 
   /* ═══════ FACTS - the right column ═══════
      A <dl>: four terms and their descriptions. The rule is the column's left
@@ -603,7 +625,7 @@
       <h2>The Catalyst</h2>
       <p class="lead">It's 2023. The CEO asks how much it costs to run Instagram. Nobody in the room has an accurate answer.</p>
       <p>Meta spends billions a year on capacity - storage, compute, and GPUs for AI training. Until that moment, no one could accurately answer who ordered it, when, or for what. The math lived in spreadsheets. Different teams had different spreadsheets. Some of them disagreed.</p>
-      <p>The CEO mandate landed weeks later: 95% of Meta's fleet must be on capacity contracts, every dollar attributed to a product, operating on a quarterly cycle the CEO would review. What existed to support all of that was a small library of spreadsheets passed between teams by email. Billions of dollars of capacity, moving through email attachments.</p>
+      <p>The CEO mandate landed weeks later: <mark>95% of Meta's fleet must be on capacity contracts</mark>, every dollar attributed to a product, operating on a quarterly cycle the CEO would review. What existed to support all of that was a small library of spreadsheets passed between teams by email. Billions of dollars of capacity, moving through email attachments.</p>
       <p>That is the business problem my team and I were asked to untangle in May 2023.</p>
     </div>
   </section>
@@ -636,7 +658,7 @@
     <div class="measure">
       <h2>Process: The Map Before the Build</h2>
       <p>Capacity planning at Meta wasn't a single problem. It had 90+ interconnected workstreams, each with its own owners, terminology, and dependencies, spanning three user personas. No single design move was going to untangle that. We needed a way to look at the whole system before we started building.</p>
-      <p>We ran a three-week design sprint, leveraging prior UX research, with one central question: <em>What are the jobs people actually do here, regardless of the tools they use today?</em> We listed the jobs. We mapped them to end-to-end workflows. We ran a deliberate nouns-and-verbs exercise to build a shared taxonomy across every team touching capacity. By the end, 90+ scattered components had collapsed into six coherent product domains.</p>
+      <p>We ran a three-week design sprint, leveraging prior UX research, with one central question: <em>What are the jobs people actually do here, regardless of the tools they use today?</em> We listed the jobs. We mapped them to end-to-end workflows. We ran a deliberate nouns-and-verbs exercise to build a shared taxonomy across every team touching capacity. By the end, <mark>90+ scattered components had collapsed into six coherent product domains</mark>.</p>
       <p>That reframe accomplished three things simultaneously: it defragmented the ecosystem. It shifted the focus onto real user workflows instead of inherited org charts. And it freed the team to design and build in parallel, establishing clear boundaries and dependencies for each domain.</p>
     </div>
   </section>
@@ -658,7 +680,7 @@
         <li>PM-design hybrid designers tackled the messy, cross-functional decisions.</li>
         <li>I pulled one of our strongest craftspeople off the team entirely, freeing them to elevate the quality of everything we shipped across the board.</li>
       </ul>
-      <p>Then I established a cadence the team could trust: <strong>stand-up Monday, critique Wednesday, demo to leadership on Friday.</strong> The Friday demos became our load-bearing ritual. Every week, the leadership that funded our work saw our progress, and my designers saw their craft taken seriously by the room that mattered most. Within a quarter, the team's posture transformed. They were energized, autonomous, and excited about the problems they were solving.</p>
+      <p>Then I established a cadence the team could trust: <strong>stand-up Monday, critique Wednesday, demo to leadership on Friday.</strong> The Friday demos became our load-bearing ritual. Every week, the leadership that funded our work saw our progress, and my designers saw their craft taken seriously by the room that mattered most. <mark>Within a quarter, the team's posture transformed</mark>. They were energized, autonomous, and excited about the problems they were solving.</p>
     </div>
   </section>
 
@@ -770,7 +792,7 @@
           <p>&ldquo;Your leadership through stakeholder complexity gave research the exact runway to build something delightful&rdquo;</p>
           <footer>
             <svg class="glyph" aria-hidden="true"><use href="#glyph"/></svg>
-            <div><span class="who">Senior Designer</span></div>
+            <div><span class="who">Senior Researcher</span></div>
           </footer>
         </blockquote>
 

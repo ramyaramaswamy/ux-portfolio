@@ -305,6 +305,26 @@ and an attribution. Three equal columns, VP quote in the middle as the original 
 it, cards stretched to a common height with each attribution pushed down by `margin-top:auto`
 so all three faces sit on one line.
 
+**The gold highlight, five times on 2,400 words.** The marker device from the reference,
+in this palette's gold. It is **reserved for figures and outcomes** — never a whole
+explanatory sentence, because a highlight covering the argument stops pointing at anything
+inside it — and it is **paper only**: the wash is mixed for white, and the plum bands
+already have gold doing this job in their metric values. Roughly one per act: the two
+intro figures, the CEO's 95% mandate, the 90+→six collapse, and the team's turnaround.
+The Product section is deliberately unmarked, because the Results band lands directly
+after it carrying four gold numbers and two emphases in a row is one too many.
+
+Three details in the rule itself:
+
+- **Colour is set, not inherited.** The wash renders `#F4E4BC`; ink on it clears 12.6:1,
+  while the body grey it used to inherit managed 6.0:1. A phrase singled out as important
+  shouldn't be the least legible thing in its own paragraph.
+- **Weight 500, not 600.** The prose already runs `<strong>` at 700 in several places, so
+  a heavier highlight competed with it rather than sitting a step above the body.
+- **Horizontal padding `.12em`, and `box-decoration-break: clone`.** At `.2em` the right
+  padding visibly detached a sentence-final period from its own sentence; `clone` gives a
+  wrapped highlight its padding and radius on both fragments instead of slicing them.
+
 ### Mobile
 
 One extra stop below the 900px block: **480px**, where the intro facts go one-up. Two
