@@ -1,20 +1,39 @@
 # Design explorations
 
-**Current design: `home-v16.html`** — open this one. Everything else is history.
+**Current designs: `home-v16.html` and `capacity-v1.html`** — open these two. Everything
+else is history.
 
-## Where we got to (31 Jul 2026)
+## Where we got to (9 Aug 2026)
 
-The home page is design-complete. Desktop and mobile both done, tokens reconciled,
-keyboard focus built. What remains is content, not design — see **Still open** below.
+Both pages are design-complete. The home page was finished on 31 Jul; the capacity case
+study caught up on 9 Aug and is now mobile-complete, with its figures rebuilt and its
+testimonials promoted out of a raster into real markup. What remains on both is content,
+not design — see **Still open** below.
 
 The original build order was Capacity first, on the theory that the hardest page should
-define the components. That's now inverted: home is built, so **the next step is writing
-the spec**, using `home-v16.html` as the reference for tokens and components, then
-`capacity.html`.
+define the components. That got inverted once home was built, and the two have now met in
+the middle: capacity was built by porting home's tokens and shell wholesale, which is the
+proof that the token set travels. **The next step is writing the spec**, using both files
+as the reference, then extracting `css/style.css` and the real pages.
 
 ---
 
 ## Still open
+
+**On `capacity-v1.html`:**
+
+- **The cover is still a placeholder** — `.cover-ph`, full bleed at 16:5. Change
+  `--cover-ratio` alone and the band, the placeholder and the shipped image all follow.
+- **Three figures are still softened** by the upscaling mistake described under *Figures*:
+  `product-areas` (1.50×), `prioritization-matrix` (1.62×), `team-archetypes` (1.32×).
+  `vteams` was reverted; these three weren't. Re-cutting them at native cropped size keeps
+  the size gain and removes the softness — it costs nothing but a re-export.
+- **`testimonials.webp` is now unused** (73KB) since the quotes became markup. Delete it
+  once you're sure the raster isn't wanted elsewhere.
+- **The two short testimonials have no organisation** against the VP's "Meta". Fine if
+  that's deliberate; inconsistent if it isn't.
+
+**On `home-v16.html`:**
 
 - ~~Case study covers~~ **done.** Both are in and both placeholders are gone:
   `images/capacity/cover.png` and `images/agentic-ai/cover.png`, each 2400×1800 (2× at the
@@ -252,6 +271,91 @@ should not be overridable by a `nav a` sitting elsewhere in the file.
 
 ---
 
+## The capacity case study — `capacity-v1.html`
+
+Tokens and shell ported from `home-v16.html` unchanged. Two tokens are its own:
+`--measure: 660px`, the reading column, deliberately far narrower than home's because this
+page carries 2,400 words of running prose and home carries almost none; and `--stack: 56px`,
+the prose→figure gap, set at roughly half `--band` so a figure sits closer to the paragraph
+it belongs to than two chapters sit to each other.
+
+### Sections
+
+**Intro is plain paper — no dot ground.** It used to carry home's hero grid as a callback.
+The cover sits directly above it and has a dot texture of its own, and two patterned bands
+stacked read as decoration competing with the title rather than as one image over one page.
+
+**Both pull quotes open on a gold eyebrow.** The slot used to be either/or — a row of gold
+dots on the first, a label on the second — and side by side they read as two components
+rather than as the same voice twice, which is the one thing that band exists to avoid. The
+label also names what the sentence *is*, which a dot can't. The blockquote measure is
+**44ch, not 26**: both quotes set their own breaks with `<br>`, and at 26ch the longer one
+wrapped again underneath, so one came out as two tidy lines and the other as three ragged
+ones. 44ch clears the longest authored line, so every quote breaks where it says it breaks.
+
+**Results is centred**, like the quote bands. It was the one block set left, and against an
+888px band that put its left edge 136px outboard of every heading above it — the page's
+strongest section read as the one that had slipped. Below 900px the *paragraph* reverts to
+left: centred prose has no fixed left edge to return to, which the eye absorbs over the
+three or four lines this runs to on desktop and not over the eleven it becomes at 390px.
+
+**Testimonials are HTML, not an image** — the page's second and last quote treatment. The
+plum band is the author's voice; a card is other people's, because a card can carry a face
+and an attribution. Three equal columns, VP quote in the middle as the original slide had
+it, cards stretched to a common height with each attribution pushed down by `margin-top:auto`
+so all three faces sit on one line.
+
+### Mobile
+
+One extra stop below the 900px block: **480px**, where the intro facts go one-up. Two
+columns inside a 390px screen left each value ~110px, turning the longest into six lines —
+and since grid rows take their tallest cell, it opened a hole the same six lines deep under
+the shortest. One column is no taller in practice, because the hole goes with it.
+
+### Figures
+
+**They shrink. They do not pan.** The first attempt gave every figure `min-width: 720px`
+inside an `overflow-x` scroller, with a sticky edge fade to advertise the crop. That was the
+wrong trade: it bought label-level legibility for all nine to serve a need only one of them
+had. Eight argue in **shapes, densities and rhythms** — thirty boxes collapsing into six,
+nine screens sharing one language, a pod above six teams — and those survive being small.
+Only the quotes argued in words, and the answer there was to stop shipping words as a
+picture, not to make the picture pannable. Panning's cost was paid by every reader on every
+figure: a nested scroll region inside a scrolling page, a figure cropped at the right edge
+whether or not you chose to explore it, and an affordance needed to explain the crop.
+
+Detail now lives one tap away — **every figure links to its own full-size export**
+(`cursor: zoom-in`), which brings the browser's pinch-zoom with it for free and costs no
+JavaScript. The link is not mobile-only; a figure that behaves differently by width is
+harder to explain than one that always does the same thing. It does add nine tab stops,
+unlike home's image links which are deliberately `tabindex="-1"` — correct here, because
+the link is the only route to full resolution.
+
+**Trim the dead margin, then leave the crop at native size.** Several exports floated in
+whitespace — `product-home` was 34.8% empty across its width. Cropping to the content box
+plus ~3% padding makes the content fill the frame, which is worth 1.03×–1.45× of apparent
+size for free. Two things learned the hard way:
+
+- **Trimming costs no sharpness.** Cutting empty pixels doesn't touch content pixels, so a
+  figure cropped to its native 1390px displays at exactly the density the untrimmed 1700px
+  file did — it just fills the frame instead of floating in it.
+- **Never resize up after cropping.** Only `product-home` has a true 2× export (4800px);
+  `vteams`, `product-areas`, `team-archetypes` and `prioritization-matrix` are ~1700px 1×
+  exports. Cropping those and then scaling to a 2080/2360 target invented pixels and
+  visibly softened them — worst at 1.68× on `vteams`, which is why that one was reverted to
+  its untrimmed original. Check the source resolution before choosing a delivery width.
+
+**Delivery is WebP at q88.** The nine figures went **6.24MB → 1.15MB, an 82% cut**, checked
+at 1:1 against the PNGs on the smallest type in the set and indistinguishable. That matters
+more now that mobile readers actually look at the figures instead of skipping past a pan,
+and it's what makes these assets cheap enough to keep in git at all — 6MB of PNGs would
+have bloated the repo permanently on every re-export. `cover.png` stays PNG because
+`home-v16.html` references it.
+
+> **Source-of-truth warning.** Every trimmed figure is re-derived from `Capacity Case Study/`,
+> which is **gitignored** and exists only on this machine. In the repo the WebPs are the only
+> copies — a fresh clone can't rebuild them. Back that folder up somewhere off-machine.
+
 ## Rules that emerged
 
 - **Gold is never text on paper.** `#d9a521` on white is 2.24:1. It works on the plum
@@ -264,6 +368,17 @@ should not be overridable by a `nav a` sitting elsewhere in the file.
   study metrics gained dividers.
 - **Behind the portrait, use tone with no edge.** No lines, no shapes, nothing with a
   boundary. This came out of three failed attempts — see below.
+- **Never scope a component rule by element.** This has now bitten three times. `nav .links`
+  beat the mobile override; `nav a` beat `.btn`; and on the capacity page a bare `footer`
+  selector styling the page footer reached inside every testimonial card and put a black
+  block behind each attribution. Fixed by giving the page footer `.pagefoot` and scoping all
+  six of its rules to that class. A page-level region and a component are different things
+  and must not share a selector — the moment a second `<footer>`, `<nav>` or `<header>`
+  exists anywhere on the page, an element selector is a bug waiting for a date.
+- **Ask what a figure argues before deciding how it must render.** A figure that argues in
+  shapes, densities or rhythms survives being small; only one that argues in *words* needs
+  its labels legible — and that one usually shouldn't be an image at all. Getting this
+  backwards is what produced the panning figures.
 
 ---
 
@@ -290,6 +405,23 @@ should not be overridable by a `nav a` sitting elsewhere in the file.
   anyway.
 - **A logo above each case study title.** Skipped — no assets exist, and it would have put
   two competing brand marks next to the wordmark in the nav.
+
+**On the capacity page:**
+
+- **Horizontally panning figures** (`min-width: 720px` in an `overflow-x` scroller, plus a
+  sticky edge fade to advertise the crop). Rejected outright — see *Figures* above. Don't
+  retry it with a nicer affordance; the affordance was never the problem, the crop was.
+- **Shrinking figures to fit with nothing else.** The other half of that false choice. A
+  22%-scale slide with 3px type doesn't read as "detail available elsewhere," it reads as a
+  blurry image, which on a design portfolio costs more than the missing detail does. The
+  answer was shrink *plus* a tap to the full-size export.
+- **Two columns for the testimonials**, long quote spanning two rows with the short pair
+  stacked beside it, on the theory the pair would come out level with the tall one.
+  Measured: 329px against 528px, leaving 200px of dead space. Equal columns absorb the
+  difference inside the cards instead.
+- **A gold eyebrow on the testimonials block.** Gold is never text on paper — same rule as
+  everywhere else. The section carries a visually-hidden heading instead, matching home's
+  decision to skip section tags entirely.
 
 ---
 

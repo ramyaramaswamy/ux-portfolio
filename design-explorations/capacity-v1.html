@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>capacity-v1 - Scaling Meta's Global Capacity Infra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, -apple-system, sans-serif; background: #dedfe2; }
+
+  /* ═══ harness chrome - not part of the design ═══ */
+  .chrome-head { background: #1b2337; color: #fff; padding: 22px 32px; position: sticky; top: 0; z-index: 60; }
+  .chrome-head .ct { font-family: 'Source Serif 4', serif; font-size: 19px; font-weight: 600; }
+  .chrome-head p { font-size: 13px; color: #9aa4b8; margin-top: 5px; }
+
+  .wrap { padding: 26px 32px 44px; }
+  .page { max-width: 1180px; margin: 0 auto; border-radius: 6px; overflow: hidden;
+          box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 14px 38px rgba(0,0,0,.16); }
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     TOKENS - carried over from home-v16 unchanged. Anything added for this
+     page is grouped at the bottom of the block and marked.
+     ═══════════════════════════════════════════════════════════════════════ */
+  .d {
+    --font-head: 'Source Serif 4', Georgia, serif;
+    --paper: #ffffff;
+
+    --plum-900: #241d3d; --plum-700: #35294f;
+    --ink-head: var(--plum-900);
+    --ink-body: #4a5468; --ink-muted: #78818f; --ink-faint: #9aa4b0;
+    --rule: #e2e5ea;
+
+    --accent: #57398a; --accent-hover: #452c6f;
+    --gold: #d9a521;
+
+    /* home's hero grid only - this page has no dot ground of its own. */
+    --dot: #d3d6dd;
+
+    --text-body: 1.04rem;
+
+    --band: 96px;
+    --band-dark: 80px;
+    --band-tight: 32px;
+
+    --r-card: 18px;
+
+    /* ── new for the case study page ──────────────────────────────────────
+       --measure  the prose column. 660px at 1.04rem lands at ~72 characters,
+                  inside the 66-75 band that reads comfortably for long text.
+                  Deliberately far narrower than home's --inner, because home
+                  has no running prose to speak of and this page has 2,400 words.
+       --stack    the gap between a prose block and the figure that follows it.
+                  Set at roughly half --band on purpose: a figure belongs to the
+                  paragraph above it, so it must sit closer to that paragraph
+                  than two chapters sit to each other. Two consecutive prose
+                  sections therefore end up --stack*2 = 112px apart, which is the
+                  chapter break, and prose→figure is 56px, which is the bond. */
+    --measure: 660px;
+    --stack: 56px;
+    /* Placeholder geometry until the real cover exists. Change this one value
+       and the band, the placeholder and the shipped image all follow. */
+    --cover-ratio: 16 / 5;
+
+    background: var(--paper); color: var(--ink-body); font-family: Inter, sans-serif;
+  }
+
+  .vh { position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+        overflow:hidden; clip-path: inset(50%); white-space:nowrap; border:0; }
+
+  .skip { position:absolute; left:-9999px; top:0; }
+  .skip:focus-visible {
+    position:fixed; left:16px; top:16px; z-index:100; width:auto; height:auto;
+    background: var(--plum-900); color:#fff; padding:12px 22px; border-radius:999px;
+    font-size:13.5px; font-weight:600; text-decoration:none;
+    box-shadow: 0 6px 22px rgba(20,15,35,.34);
+    outline: 2px solid #fff; outline-offset: 2px;
+  }
+
+  /* ═══════ THE THREE BUTTON ROLES ═══════ */
+  .btn { background: var(--accent); color:#fff; padding:13px 26px; border-radius:999px;
+         font-size:13.5px; font-weight:600; display:inline-block; text-decoration:none;
+         transition: background-color .16s, color .16s, border-color .16s; }
+  .btn:hover { background: var(--accent-hover); }
+
+  .btn-ink { background: transparent; border:1.5px solid var(--plum-900); color: var(--plum-900);
+             padding:11.5px 24.5px; border-radius:999px; font-size:13.5px; font-weight:600;
+             display:inline-block; text-decoration:none;
+             transition: background-color .16s, color .16s, border-color .16s; }
+  .btn-ink:hover { background: var(--plum-900); color:#fff; }
+
+  .btn-on-dark { background: transparent; border:1.5px solid rgba(255,255,255,.55); color:#fff;
+                 padding:11.5px 24.5px; border-radius:999px; font-size:13.5px; font-weight:600;
+                 display:inline-block; text-decoration:none;
+                 transition: background-color .16s, color .16s, border-color .16s; }
+  .btn-on-dark:hover { background: rgba(255,255,255,.12); border-color:#fff; }
+
+  :focus-visible { outline: 2px solid var(--plum-900); outline-offset: 3px; }
+  /* Flipped on every near-black section. The intro is light, so it keeps the
+     ink ring; the three plum bands and the footer flip. */
+  .pull    :focus-visible,
+  .results :focus-visible,
+  .contact :focus-visible,
+  .pagefoot :focus-visible { outline-color: #ffffff; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+  .inner      { max-width: 1000px; margin: 0 auto; padding: 0 56px; }
+  .inner-wide { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+  /* The reading column. Its own padding, so it never depends on .inner. */
+  .measure    { max-width: var(--measure); margin: 0 auto; padding: 0 22px; }
+
+  /* ═══════ NAV - ported from home-v16, DOM order unchanged ═══════ */
+  nav { display:flex; align-items:center; flex-wrap:wrap; column-gap:26px;
+        padding: 18px 56px; border-bottom: 1px solid var(--rule); background: var(--paper);
+        position:relative; z-index:10; }
+  nav .wordmark { order:1; margin-right:auto;
+                  font-family: var(--font-head); font-weight: 700; font-size: 16px; }
+  nav .wordmark a { color: var(--ink-head); text-decoration:none; }
+  nav .links { order:2; }
+  nav .links-inner { display:flex; gap:26px; align-items:center; }
+  nav .btn { order:3; padding:9px 20px; font-size:13px; }
+  nav .navtoggle { order:4; }
+  nav a:not(.btn) { font-size:13.5px; color: var(--ink-muted); text-decoration:none;
+                    transition: color .16s; }
+  nav a:not(.btn):hover { color: var(--accent); }
+  /* This page is a work page, so Work is the active branch of the site. */
+  nav a[aria-current] { color: var(--ink-head); font-weight:600; }
+
+  .navtoggle { display:none; background:none; border:0; cursor:pointer;
+               padding:10px; margin:-10px; line-height:0; }
+  .navtoggle .bars { position:relative; }
+  .navtoggle .bars,
+  .navtoggle .bars::before,
+  .navtoggle .bars::after { display:block; width:21px; height:1.5px;
+                            background: var(--plum-900); border-radius:2px;
+                            transition: transform .2s ease, background-color .2s ease; }
+  .navtoggle .bars::before { content:''; position:absolute; top:-6.5px; }
+  .navtoggle .bars::after  { content:''; position:absolute; top:6.5px; }
+  .navtoggle[aria-expanded="true"] .bars { background: transparent; }
+  .navtoggle[aria-expanded="true"] .bars::before { transform: translateY(6.5px) rotate(45deg); }
+  .navtoggle[aria-expanded="true"] .bars::after  { transform: translateY(-6.5px) rotate(-45deg); }
+
+  /* ═══════ COVER - full bleed, first thing on the page ═══════
+     Runs edge to edge of the page frame with nothing inset over it, so the
+     photograph is the whole opening rather than a backdrop for type. The rule
+     underneath gives it a bottom edge; without one, a light-bottomed image
+     dissolves into the paper below it.
+     --cover-ratio is a token because the real image isn't shot yet. 16/5 puts
+     the band at 369px inside the 1180 frame, which is tall enough to read a
+     group of people and short enough that the title still lands above the fold. */
+  .cover { margin:0; display:block; border-bottom:1px solid var(--rule); }
+  .cover img { width:100%; height:auto; display:block; }
+
+  .cover-ph { aspect-ratio: var(--cover-ratio); width:100%;
+              background-color: var(--plum-900);
+              background-image:
+                radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px),
+                radial-gradient(ellipse 70% 90% at 28% 40%, rgba(87,57,138,.85), rgba(87,57,138,0) 70%);
+              background-size: 22px 22px, auto;
+              display:flex; align-items:center; justify-content:center; }
+  .cover-ph span { font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+                   color: rgba(255,255,255,.52); text-align:center; padding:0 22px; }
+
+  /* ═══════ INTRO - two columns, narrative left, facts right ═══════
+     Light, not plum. The cover above it is now the page's dark opening chord,
+     and stacking a plum band directly under a full-bleed photograph would put
+     two heavy elements back to back with nothing to breathe between them.
+     Plain paper, no dot ground. The dot grid used to run across this block as
+     a callback to home's hero, but the cover directly above it already carries
+     a dot texture of its own - two patterned bands stacked read as decoration
+     competing with the title rather than as one image over one page. */
+  .csintro { padding: 60px 0 var(--band); }
+
+  .introgrid { display:grid; grid-template-columns: 1fr 292px; gap:0; align-items:start; }
+
+  .backlink { display:inline-block; font-size:13px; font-weight:500;
+              color: var(--ink-muted); text-decoration:none; margin-bottom:26px;
+              transition: color .16s; }
+  .backlink:hover { color: var(--accent); }
+
+  /* Three type roles in this block, not four. The "Executive summary" eyebrow
+     is gone: with a serif title, a large grey subtitle and body copy already
+     stacked, a fourth voice in caps-accent-bold was one more than the block
+     could carry, and it labelled a paragraph that needs no label. */
+  .introbody { padding-right:64px; }
+  .introbody h1 { font-family: var(--font-head); font-size: clamp(2.3rem,4.4vw,3.3rem);
+                  line-height:1.08; letter-spacing:-.018em; font-weight:600; color: var(--ink-head); }
+  .introbody .subtitle { font-size: clamp(1.15rem,1.9vw,1.5rem); line-height:1.4; font-weight:400;
+                         color: var(--ink-muted); margin-top:18px; letter-spacing:-.008em; }
+  .introbody .summary { font-size: var(--text-body); line-height:1.72; color: var(--ink-body);
+                        margin-top:34px; }
+  .introbody .summary + .summary { margin-top:18px; }
+
+  /* The marker device from the reference, in this palette's gold. Gold can't be
+     *text* on paper at 2.2:1, but as a wash behind ink it's decoration and the
+     text on it still clears 12:1. Reserved for figures and outcomes - if it
+     highlights sentences it stops meaning anything. */
+  mark { background: rgba(217,165,33,.30); color: inherit;
+         padding:.08em .2em; border-radius:2px; }
+
+  /* ═══════ FACTS - the right column ═══════
+     A <dl>: four terms and their descriptions. The rule is the column's left
+     border rather than a separate element, so it can never fall out of step
+     with the column's height. */
+  .introfacts { border-left:1px solid var(--rule); padding-left:44px; }
+  .introfacts .row { display:grid; grid-template-columns:26px 1fr; gap:14px; align-items:start; }
+  .introfacts .row + .row { margin-top:30px; }
+  .introfacts svg { width:22px; height:22px; color: var(--accent); margin-top:2px; }
+  .introfacts dt { font-size:12.5px; color: var(--ink-muted); margin-bottom:4px; }
+  /* Identical to .summary - same size, same weight, same colour. The values
+     were bold ink against the summary's regular body, which made the facts
+     read as the louder half of a block where the story should lead. The label
+     above each one is doing all the distinguishing that is needed. */
+  .introfacts dd { font-size: var(--text-body); font-weight:400; color: var(--ink-body);
+                   line-height:1.72; }
+
+  /* Same drawn stroke as home's hero and contact, so the device stays the page
+     family's rather than the home page's. currentColor, never a literal. */
+  .markword { position:relative; display:inline-block; }
+  .markword svg { position:absolute; left:-5%; bottom:-14px; width:110%; height:20px;
+                  overflow:visible; pointer-events:none; color: var(--gold); }
+
+  /* ═══════ PROSE ═══════ */
+  .sect { padding: var(--stack) 0; }
+  .sect h2 { font-family: var(--font-head); font-size: clamp(1.6rem,2.6vw,2.05rem);
+             font-weight:600; color: var(--ink-head); line-height:1.2;
+             letter-spacing:-.012em; margin-bottom:22px; }
+  .sect p { font-size: var(--text-body); line-height:1.72; color: var(--ink-body); }
+  .sect p + p { margin-top:20px; }
+
+  /* The Catalyst opens on the CEO line. Serif and larger, so the page starts on
+     a voice rather than on body copy. */
+  .lead { font-family: var(--font-head); font-size:1.32rem !important; line-height:1.5 !important;
+          font-style:italic; color: var(--ink-head) !important; margin-bottom:30px; }
+
+  .sect ul { list-style:none; margin:24px 0 0; }
+  /* A paragraph after a list got no gap at all: p + p carried the paragraph
+     rhythm, and a p following a ul matched nothing, so "Then I established a
+     cadence..." sat flush against the last bullet and read as part of it. */
+  .sect ul + p { margin-top:20px; }
+  .sect ul li { font-size: var(--text-body); line-height:1.66; color: var(--ink-body);
+                padding-left:22px; position:relative; }
+  .sect ul li + li { margin-top:14px; }
+  .sect ul li::before { content:''; position:absolute; left:0; top:.62em;
+                        width:7px; height:7px; border-radius:50%; background: var(--accent); }
+
+  /* Reflections - a term and its explanation, so the lead-in carries weight. */
+  .principles li strong { color: var(--ink-head); font-weight:600; }
+
+  /* ═══════ FIGURES - full bleed to the page frame ═══════
+     The slide exports are pure white ground with a grey dot grid, which is
+     exactly --paper plus home's own dot motif. So a figure joins the page with
+     no seam and needs no frame, no border and no caption: each slide already
+     carries its own title, and a caption would be a third label on one image.
+     The titles are baked into the raster, though, which is why every figure
+     carries real alt text rather than an empty one. */
+  /* ── Two figure widths ─────────────────────────────────────────────────
+     Bleed is assigned per figure, not derived: V-teams, Team Dynamics, the
+     home page, the product screens and the quotes run edge to edge. Everything
+     else is contained.
+
+     Contained means the title column, not the prose column. At prose width
+     these three rendered at 36-42% of source: the product-area map's boxes
+     were a few pixels tall and its six labels about 5px, well under the
+     legibility floor. .fig--contained carries .inner-wide's geometry exactly,
+     so they still align with the title and the page keeps two left edges
+     rather than three - but they land at 61-70% instead. */
+  .fig { margin:0; display:block; }
+  .fig img { width:100%; height:auto; display:block; }
+  /* Every figure links to its own full-size export. On a phone the figure sits
+     in the page at whatever size the column gives it - calm, complete, nothing
+     hidden - and the detail lives one tap away in the browser's own image
+     viewer, which brings pinch-zoom with it for free. That keeps the page
+     honest about what it is showing: the whole figure, small, rather than part
+     of a figure with the rest off-screen.
+     The link is not mobile-only. A full-resolution export is worth having on a
+     desktop too, and a figure that behaves differently depending on width is a
+     harder thing to explain than one that always does the same thing. */
+  .fig a { display:block; cursor:zoom-in; }
+  .fig--contained { max-width:1120px; margin-left:auto; margin-right:auto; padding:0 40px; }
+
+  /* Two figures in a row would merge into one white expanse - they share a
+     ground and neither has an edge. */
+  .fig + .fig { margin-top: var(--stack); }
+
+  /* ═══════ QUOTES - one treatment ═══════
+     Both pull quotes are the same component on the same plum band. There used
+     to be two treatments - this one, and a left-rule quote inline in the prose -
+     and side by side they read as two different kinds of thing rather than as
+     the same voice twice. A quote either earns a band or it stays a sentence
+     in a paragraph; there is no third case on this page.
+
+     Every quote opens on a gold label. The slot used to be either/or - a row of
+     gold dots on the first quote, a label on the second - and the two read as
+     two different components rather than as the same voice twice, which is the
+     one thing this band is supposed to avoid. The label also earns its keep: it
+     names what the sentence *is*, which a dot cannot. */
+  .pull { background: var(--plum-900); padding: var(--band-dark) 22px; text-align:center; }
+  /* 44ch, not 26. Both quotes set their own line breaks with <br>, and at 26ch
+     the second one's longer line wrapped again underneath - so quote one came
+     out as two tidy lines and quote two as three ragged ones. The measure now
+     clears the longest authored line, which means every quote breaks exactly
+     where it says it breaks. balance only comes into play on narrow screens,
+     where a line does have to wrap. */
+  .pull blockquote { font-family: var(--font-head); font-size: clamp(1.7rem,3.4vw,2.4rem);
+                     font-weight:600; line-height:1.28; letter-spacing:-.012em; color:#fff;
+                     max-width:44ch; margin:0 auto; text-wrap: balance; }
+  .pull .label { font-size:11.5px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+                 color: var(--gold); margin-bottom:24px; }
+
+  /* ═══════ RESULTS ═══════
+     Gold values are legal here and only here on this page - #d9a521 clears 7:1
+     on the plum and fails at 2.2:1 on paper, which is why the same figures on
+     home's case study rows are ink.
+     grid-auto-flow:column follows home's .csmetrics: the track count comes from
+     the number of metrics, so a future case study with three doesn't get four
+     columns with a hole in it.
+
+     Centred, like the quote bands. Every other block on this page is either a
+     centred reading column or a centred quote; Results was the one thing set
+     left, and against a 888px band that put its left edge 136px outboard of
+     every heading above it - so the page's strongest section read as the one
+     that had slipped. Centring settles it and makes the three plum bands one
+     family rather than two treatments. */
+  .results { background: var(--plum-900); padding: var(--band-dark) 0; text-align:center; }
+  .results h2 { font-family: var(--font-head); font-size: clamp(1.6rem,2.6vw,2.05rem);
+                font-weight:600; color:#fff; line-height:1.2; margin-bottom:22px; }
+  /* .inner is 888px of content, which runs this paragraph to ~95 characters -
+     well past the point where the eye loses the line return. The dark bands are
+     wider than the reading column by design, but the *text* inside them still
+     has to obey a measure. Centred, that measure also has to be centred itself,
+     hence the auto margins. */
+  .results p { font-size: var(--text-body); line-height:1.72; color: rgba(255,255,255,.78);
+               max-width: 62ch; margin-left:auto; margin-right:auto; }
+  .rgrid { display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
+           margin-top:52px; padding-top:40px; border-top:1px solid rgba(255,255,255,.14); }
+  /* Symmetric padding on every cell now, rather than right-only with the first
+     and last trimmed. Left-aligned values needed to sit flush to the band edge;
+     centred ones sit in the middle of their track, so an equal gutter each side
+     is what keeps the dividers evenly spaced. */
+  .rgrid > div { padding: 0 22px; }
+  .rgrid > div + div { border-left:1px solid rgba(255,255,255,.14); }
+  .rgrid .v { font-family: var(--font-head); font-size: clamp(1.8rem,3.2vw,2.6rem);
+              font-weight:700; line-height:1.05; color: var(--gold); letter-spacing:-.02em;
+              display:flex; align-items:baseline; justify-content:center; gap:5px; flex-wrap:wrap; }
+  /* Both figures carry full gold; only the arrow is dimmed, so it separates
+     without demoting either number. Same rule as home. */
+  .rgrid .arrow { color: rgba(255,255,255,.42); font-family: Inter, sans-serif;
+                  font-size:.62em; font-weight:500; }
+  .rgrid .l { font-size:12.5px; line-height:1.5; color: rgba(255,255,255,.66); margin-top:12px; }
+
+  /* ═══════ VOICES - the second quote treatment ═══════
+     These were a raster until now, which was the wrong container for them
+     twice over: the export was cropped so two of the three quotes were
+     physically cut off in the file, and at 370px the whole strip rendered 90px
+     tall, so the one surviving quote couldn't be read either. Words that a
+     reader might want to quote back at you should never be pixels - as markup
+     they are legible at every width, selectable, searchable and announced by a
+     screen reader.
+     This is the page's SECOND quote treatment and the last one it gets. The
+     plum band is the author's voice - the sentences Ramya wants remembered.
+     This is other people's voice, and it's a card because a card can carry an
+     attribution and a face, which is the whole point of a testimonial: not
+     what was said, but who said it.
+
+     Three equal columns with the long quote in the middle, which is how the
+     original slide had it. A first attempt gave the long one its own column
+     spanning two rows with the short pair stacked beside it, on the theory
+     that two short cards plus a gap would come out level with one tall one.
+     Measured, they didn't: 329px against 528px, leaving 200px of dead space
+     under the tall card. Equal columns put the difference where it can be
+     absorbed instead - inside the cards.
+     The cards stretch to a common height and each one pushes its attribution
+     to the bottom with margin-top:auto, so all three faces sit on one line.
+     That turns the leftover space in the two short quotes into breathing room
+     above a fixed baseline, which reads as deliberate, rather than into a
+     ragged bottom edge, which reads as an accident. */
+  .voices { padding: var(--stack) 0; }
+  .voicegrid { display:grid; grid-template-columns: repeat(3, 1fr); gap:22px; }
+  .voice { margin:0; display:flex; flex-direction:column;
+           background: var(--paper); border:1px solid var(--rule);
+           border-radius: var(--r-card); padding:28px 28px 24px;
+           box-shadow: 0 8px 24px rgba(16,24,40,.06); }
+  /* Inter, not the serif. The serif is display only on this page, and these
+     are somebody else's running sentences, not a headline. */
+  .voice p { font-size: var(--text-body); line-height:1.66; color: var(--ink-body); }
+  /* The one senior endorsement is marked by ink weight, not by size - a bigger
+     type size would have made the tallest card taller still. */
+  .voice--lead p { color: var(--ink-head); }
+  .voice footer { display:flex; align-items:center; gap:13px; margin-top:auto; padding-top:24px; }
+  .voice .glyph { width:38px; height:38px; flex-shrink:0; }
+  .voice .who { display:block; font-size:14px; font-weight:600; color: var(--ink-head); }
+  .voice .org { display:block; font-size:13px; color: var(--ink-muted); margin-top:1px; }
+
+  /* ═══════ NEXT ═══════ */
+  .next { padding: var(--band) 0; border-top:1px solid var(--rule); }
+  .nextcard { display:flex; align-items:center; justify-content:space-between; gap:28px;
+              border:1px solid var(--rule); border-radius: var(--r-card); padding:34px 38px;
+              text-decoration:none; transition: border-color .16s, background-color .16s; }
+  .nextcard:hover { border-color: var(--accent); background: #faf9fc; }
+  .nextcard .eyebrow { font-size:11.5px; font-weight:700; letter-spacing:.14em;
+                       text-transform:uppercase; color: var(--accent); margin-bottom:12px; }
+  .nextcard h2 { font-family: var(--font-head); font-size:1.6rem; font-weight:600;
+                 color: var(--ink-head); line-height:1.24; }
+  .nextcard p { font-size:.96rem; color: var(--ink-muted); margin-top:8px; max-width:46ch; }
+  .nextcard .go { font-size:1.5rem; color: var(--accent); flex-shrink:0; }
+
+  /* ═══════ CONTACT + FOOTER - ported unchanged ═══════ */
+  .contact { background: var(--plum-900); color:#cdc6dd; padding: var(--band-dark) 0; }
+  .contact h2 { font-family: var(--font-head); font-size: clamp(1.9rem,3.4vw,2.5rem); font-weight:600;
+                color:#fff; line-height:1.18; margin-bottom:26px; }
+  .contact .markword svg { bottom:-11px; height:16px; }
+  .contact p { font-size: var(--text-body); line-height:1.66; max-width:54ch; opacity:.84; margin-bottom:32px; }
+  .contact .btn-on-dark + .btn-on-dark { margin-left:12px; }
+
+  .pagefoot { background:#14121f; color:#7d7690; padding: var(--band-tight) 0; font-size:12.5px; }
+  .pagefoot .inner { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .pagefoot a { color:#9a93ab; text-decoration:none; margin-left:22px; transition: color .16s; }
+  .pagefoot a:hover { color:#ffffff; }
+
+  @media (max-width: 900px) {
+    .d { --band: 64px; --band-dark: 56px; --band-tight: 28px; --stack: 40px; }
+    .inner, .inner-wide, nav { padding-left:22px; padding-right:22px; }
+
+    nav { column-gap:14px; }
+    nav .navtoggle { display:block; }
+    nav .btn { order:2; padding:8px 15px; font-size:12.5px; }
+    nav .links { order:4; flex-basis:100%; margin:0 -22px;
+                 display:grid; grid-template-rows:0fr; overflow:hidden;
+                 visibility:hidden; opacity:0;
+                 transition: grid-template-rows .3s ease, opacity .22s ease,
+                             visibility 0s linear .3s; }
+    nav:has(.navtoggle[aria-expanded="true"]) .links {
+                 grid-template-rows:1fr; visibility:visible; opacity:1;
+                 transition: grid-template-rows .3s ease, opacity .22s ease .05s,
+                             visibility 0s linear 0s; }
+    nav .links-inner { min-height:0; overflow:hidden; padding-top:14px;
+                       display:flex; flex-direction:column; align-items:stretch; gap:0; }
+    nav .links a { padding:15px 22px; font-size:15px; color: var(--ink-head); }
+    nav .links a + a { border-top:1px solid var(--rule); }
+    nav .links a:focus-visible { outline-offset:-3px; }
+
+    /* One column. The facts move below the summary and the divider rotates
+       from the column's left border to a rule above the block - the same
+       separation doing the same job in the direction the layout now runs. */
+    .csintro { padding-top:36px; }
+    .introgrid { grid-template-columns:1fr; }
+    .introbody { padding-right:0; }
+    .introfacts { border-left:0; padding-left:0;
+                  border-top:1px solid var(--rule); margin-top:40px; padding-top:34px; }
+    /* Two up rather than four stacked - these are four short facts, and stacked
+       they push the first paragraph of the story most of a screen further down. */
+    .introfacts dl { display:grid; grid-template-columns:1fr 1fr; gap:28px 20px; }
+    .introfacts .row + .row { margin-top:0; }
+
+    /* ═══ FIGURES shrink, and the detail moves to a tap ═══
+       This replaces the horizontal pan, which was the wrong trade. Panning
+       bought label-level legibility for all nine figures to serve a need that
+       only one of them had: eight argue in shapes, densities and rhythms -
+       thirty boxes collapsing into six, nine screens sharing one language, a
+       pod above six teams - and those survive being small. Only the quotes
+       argue in words, and the answer there is to stop shipping words as a
+       picture, not to make the picture pannable.
+       What panning cost was paid on every figure and on every reader: a nested
+       scroll region inside a scrolling page, a figure cropped at the right edge
+       whether or not you chose to explore it, and an affordance needed to
+       explain the crop. Shrinking costs detail that was already optional, and
+       the tap target gives it back on demand. */
+    /* The distinction collapses at one column - there is no margin to spare at
+       390px, so a contained figure would just be a narrower figure. */
+    .fig--contained { max-width:none; padding:0; }
+
+    /* Centred heading and centred metrics, but the paragraph goes back to the
+       left here. Centred prose has no fixed left edge to return to, which the
+       eye can absorb over the three or four lines this runs to on a desktop
+       band - and not over the eleven it becomes at 390px. The band still reads
+       as centred; the one element where centring costs legibility opts out. */
+    .results p { text-align:left; }
+
+    .rgrid { grid-auto-flow:row; grid-template-columns:1fr 1fr; gap:0; }
+    .rgrid > div { padding:22px; border-left:1px solid rgba(255,255,255,.14); }
+    .rgrid > div:nth-child(odd) { border-left:0; }
+    .rgrid > div:nth-child(-n+2) { padding-top:0; }
+    .rgrid > div:nth-child(n+3) { border-top:1px solid rgba(255,255,255,.14); }
+
+    /* One column. The two-column balance was built around a tall card sitting
+       beside two short ones; stacked, there is nothing to balance, so the
+       lead's row span has to be released or it reserves a second row it no
+       longer occupies. */
+    .voicegrid { grid-template-columns:1fr; gap:16px; }
+    .voice--lead { grid-row:auto; }
+    .voice { padding:26px 24px 22px; }
+    .voice--lead p { font-size:1.06rem; }
+
+    .nextcard { flex-direction:column; align-items:flex-start; gap:20px; padding:26px 24px; }
+    .wrap { padding-left:10px; padding-right:10px; }
+  }
+
+  /* ═══════ PHONE ═══════
+     A second stop, not a second layout. Everything below is a rule that is
+     right on a tablet and wrong on a handset, so it needs its own width rather
+     than a value tuned to sit between the two. */
+
+  /* The facts go one up. Two columns inside a 390px screen leaves each value
+     about 110px of text, which turned "10 designers, embedded across PM, UXR,
+     Eng and Data Science" into six lines - and because grid rows take the
+     height of their tallest cell, it opened a hole under "Design Director"
+     the same six lines deep. One column is no taller in practice, since the
+     hole goes with it, and every value gets the full width to wrap in. */
+  @media (max-width: 480px) {
+    .introfacts dl { grid-template-columns:1fr; gap:24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="chrome-head">
+  <div class="ct">capacity-v1 - Scaling Meta's Global Capacity Infra</div>
+  <p>Approach A: narrative spine, full-bleed figure bands. Tokens and shell ported from home-v16.</p>
+</div>
+
+<div class="wrap">
+<div class="page d">
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <nav>
+    <span class="wordmark"><a href="#">Ramya Ramaswamy</a></span>
+    <button class="navtoggle" type="button" aria-expanded="false" aria-controls="navmenu" aria-label="Menu">
+      <span class="bars" aria-hidden="true"></span>
+    </button>
+    <span class="links" id="navmenu"><span class="links-inner"><a href="#" aria-current="true">Work</a><a href="#">Philosophy</a></span></span>
+    <a href="#contact" class="btn">Get in touch</a>
+  </nav>
+
+  <main id="main" tabindex="-1">
+
+  <!-- ═══ 1. COVER - full bleed. Placeholder until the real image arrives. ═══ -->
+  <figure class="cover">
+    <div class="cover-ph"><span>Cover image - placeholder<br>full bleed · 16:5</span></div>
+  </figure>
+
+  <!-- ═══ 2. INTRO - narrative left, facts right ═══ -->
+  <section class="csintro">
+    <div class="inner-wide">
+      <!-- Back link sits above the grid, not inside the left column. Inside it,
+           the facts started level with the link while the title began a line
+           lower, so the two halves of the block opened at different heights. -->
+      <a class="backlink" href="#">← All work</a>
+
+      <div class="introgrid">
+
+        <div class="introbody">
+          <!-- The stroke is on the last word, not on "Capacity". At this size the
+               title wraps, and marking a word that lands at the end of line one
+               put the stroke between the two lines, where it reads as a rule
+               rather than as an underline. -->
+          <h1>Scaling Meta's Global Capacity <span class="markword">Infra<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg></span></h1>
+          <p class="subtitle">Architecting the vision, product strategy, and cross-functional teams that enabled $1B+ in capacity savings.</p>
+
+          <!-- Kept to a single short paragraph on purpose: the left column
+               should finish at roughly the same height as the facts beside it,
+               so the two halves close together and the story starts on a clean
+               horizontal. Everything cut from here is said properly further
+               down the page - this is the trailer, not the summary. -->
+          <p class="summary">Billions of dollars of Meta's capacity were being planned in spreadsheets emailed between teams. I led the design of <strong>InfraCloud</strong>, the ecosystem that replaced them, and grew the org from <mark>10 to 25 designers</mark> to build it - enabling <mark>$1B+ in savings</mark> and making design a strategic partner in an engineering-first org.</p>
+        </div>
+
+        <aside class="introfacts">
+          <h2 class="vh">Project details</h2>
+          <dl>
+            <div class="row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></svg>
+              <div><dt>Primary role</dt><dd>Design Director</dd></div>
+            </div>
+            <div class="row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3 19.5a6 6 0 0 1 12 0"/><path d="M16.2 6.3a3 3 0 0 1 0 5.4"/><path d="M17.6 14.4a6 6 0 0 1 3.4 5.1"/></svg>
+              <div><dt>Team</dt><dd>10 designers, embedded across PM, UXR, Eng and Data Science</dd></div>
+            </div>
+            <div class="row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.2" width="17" height="15.3" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+              <div><dt>Time frame</dt><dd>2023 - present</dd></div>
+            </div>
+            <div class="row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.4 21 8l-9 4.6L3 8z"/><path d="M3 12.6 12 17.2l9-4.6"/><path d="M3 17.2 12 21.8l9-4.6"/></svg>
+              <div><dt>Domain</dt><dd>Infra - Capacity Planning</dd></div>
+            </div>
+          </dl>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 4. THE CATALYST ═══ -->
+  <section class="sect">
+    <div class="measure">
+      <h2>The Catalyst</h2>
+      <p class="lead">It's 2023. The CEO asks how much it costs to run Instagram. Nobody in the room has an accurate answer.</p>
+      <p>Meta spends billions a year on capacity - storage, compute, and GPUs for AI training. Until that moment, no one could accurately answer who ordered it, when, or for what. The math lived in spreadsheets. Different teams had different spreadsheets. Some of them disagreed.</p>
+      <p>The CEO mandate landed weeks later: 95% of Meta's fleet must be on capacity contracts, every dollar attributed to a product, operating on a quarterly cycle the CEO would review. What existed to support all of that was a small library of spreadsheets passed between teams by email. Billions of dollars of capacity, moving through email attachments.</p>
+      <p>That is the business problem my team and I were asked to untangle in May 2023.</p>
+    </div>
+  </section>
+
+  <!-- ═══ FIGURE - v-teams. Sits against the problem statement rather than in
+       the People section: it answers "who was asked to untangle it" while that
+       sentence is still on screen. ═══ -->
+  <figure class="fig">
+    <a href="../images/capacity/vteams.webp"><img src="../images/capacity/vteams.webp"
+         alt="The V-team structure: a cross-functional pod of Engineering, PM, UXR, Data Science and Design at the top, feeding six parallel V-teams of five people each."></a>
+  </figure>
+
+  <!-- ═══ 5. THE VISION ═══ -->
+  <section class="sect">
+    <div class="measure">
+      <h2>The Vision: What We Set Out to Build</h2>
+      <p>The work called for a single, unified ecosystem - software that understood Meta's infrastructure deeply enough to replace the fragmented spreadsheets. We needed one centralized place where every product (Facebook, Instagram, WhatsApp) could forecast demand, the infra team could plan against it, and leadership could see the full picture in a single view.</p>
+      <p>We called it <strong>InfraCloud</strong>. Through rigorous UX research and design sprints, we landed on six interconnected product areas that establish a single, shared language for how Meta discusses capacity.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 6. FIGURE - product areas ═══ -->
+  <figure class="fig fig--contained">
+    <a href="../images/capacity/product-areas.webp"><img src="../images/capacity/product-areas.webp"
+         alt="Before and after. Above, a dense map of more than thirty interlinked boxes mirroring Meta's technical systems. Below, the same territory resolved into six product areas in a single row - Demand Collection, Budget, Change Mgmt, Decision Making, Platform and Fleet."></a>
+  </figure>
+
+  <!-- ═══ 7. PROCESS ═══ -->
+  <section class="sect">
+    <div class="measure">
+      <h2>Process: The Map Before the Build</h2>
+      <p>Capacity planning at Meta wasn't a single problem. It had 90+ interconnected workstreams, each with its own owners, terminology, and dependencies, spanning three user personas. No single design move was going to untangle that. We needed a way to look at the whole system before we started building.</p>
+      <p>We ran a three-week design sprint, leveraging prior UX research, with one central question: <em>What are the jobs people actually do here, regardless of the tools they use today?</em> We listed the jobs. We mapped them to end-to-end workflows. We ran a deliberate nouns-and-verbs exercise to build a shared taxonomy across every team touching capacity. By the end, 90+ scattered components had collapsed into six coherent product domains.</p>
+      <p>That reframe accomplished three things simultaneously: it defragmented the ecosystem. It shifted the focus onto real user workflows instead of inherited org charts. And it freed the team to design and build in parallel, establishing clear boundaries and dependencies for each domain.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 8. PULL QUOTE - the one dark band ═══ -->
+  <section class="pull">
+    <div class="label">Our guiding principle</div>
+    <blockquote>Solutions are ephemeral.<br>Jobs are immutable.</blockquote>
+  </section>
+
+  <section class="sect">
+    <div class="measure">
+      <h2>People: Architecting the Team</h2>
+      <p>The team I inherited was talented but burnt out from shifting priorities. To restore velocity and morale, I initiated a major org restructuring.</p>
+      <p>I started by matching designers to product areas based on their core strengths and archetypes, not just their job titles or levels:</p>
+      <ul>
+        <li>A systems thinker was brought in from another org to act as the design lead.</li>
+        <li>The high-velocity designers took the workstreams that needed the most ground covered.</li>
+        <li>PM-design hybrid designers tackled the messy, cross-functional decisions.</li>
+        <li>I pulled one of our strongest craftspeople off the team entirely, freeing them to elevate the quality of everything we shipped across the board.</li>
+      </ul>
+      <p>Then I established a cadence the team could trust: <strong>stand-up Monday, critique Wednesday, demo to leadership on Friday.</strong> The Friday demos became our load-bearing ritual. Every week, the leadership that funded our work saw our progress, and my designers saw their craft taken seriously by the room that mattered most. Within a quarter, the team's posture transformed. They were energized, autonomous, and excited about the problems they were solving.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 12. FIGURE - archetypes ═══ -->
+  <figure class="fig fig--contained">
+    <a href="../images/capacity/team-archetypes.webp"><img src="../images/capacity/team-archetypes.webp"
+         alt="Designers mapped onto the six product areas by archetype - high output generator, PM/design hybrid, generalist - with a design lead hired for systems expertise at one end and a craftsperson moved out to focus on the design system at the other. Below, the weekly ritual: stand-up Monday, crit Wednesday, demo to VPs Friday."></a>
+  </figure>
+
+  <!-- ═══ 13. PEOPLE, CONT. - rituals ═══ -->
+  <figure class="fig fig--contained">
+    <a href="../images/capacity/team.webp"><img src="../images/capacity/team.webp"
+         alt="The design team crowded round a table at the end of a working session, arms up and pulling faces, with remote teammates joining on the screen behind them."></a>
+  </figure>
+
+  <figure class="fig">
+    <a href="../images/capacity/team-dynamics.webp"><img src="../images/capacity/team-dynamics.webp"
+         alt="A montage of the team's principles, rituals and artifacts - Grow Together, Champion the User and Connect the Dots; how design is perceived in the organization; primary tools; a typical week; and photographs of the team at a celebration, a dinner and a design jam."></a>
+  </figure>
+
+  <!-- ═══ 15. PRODUCT ═══ -->
+  <section class="sect">
+    <div class="measure">
+      <h2>Product: Shipped in Pieces, Designed as One</h2>
+      <p>Meta's capacity planning cycle ran every quarter, regardless of whether we were ready. Waiting for a "complete" tool would have meant shipping nothing in time to matter.</p>
+      <p>Our first product decision was a prioritization strategy. Instead of building toward a single monolithic launch, we broke the vision down into the smallest pieces that could unblock the next planning cycle. We ran a design-led prioritization exercise, mapping every candidate feature on importance versus effort, tying every choice back to a non-negotiable business milestone.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 16. FIGURE - prioritization matrix ═══ -->
+  <figure class="fig fig--contained">
+    <a href="../images/capacity/prioritization-matrix.webp"><img src="../images/capacity/prioritization-matrix.webp"
+         alt="A prioritization matrix ranking every feature on importance versus effort, with sticky notes explaining each axis, above a table of candidate features tagged by stage and priority."></a>
+  </figure>
+
+  <!-- ═══ 17-18. PRODUCT, CONT. + the second quote ═══ -->
+  <section class="pull">
+    <div class="label">Our golden rule</div>
+    <blockquote>Be optimistic, but be realistic.<br>Releases must tie to business milestones.</blockquote>
+  </section>
+
+  <section class="sect">
+    <div class="measure">
+      <p>This clarity gave the team predictability and the permission to defer the rest.</p>
+      <p>From there, our cadence became our strategy. Each quarter, we shipped the feature that solved the most painful friction point of the upcoming cycle - demand forecasting, then budget views, then change management, then planning insights. Policies evolved, sometimes weekly, but our release rhythm absorbed the impact. We weren't chasing policy changes, we were planning around them. Leadership finally saw a roadmap that shipped on the dates it promised, and the design team got to spend their energy designing, not reacting.</p>
+      <p>Ultimately, craft is what ties the ecosystem together. Across all six product areas, we built consistent patterns - a shared timeline, shared notification logic, shared insight cards. Learning one part of the product meant knowing the rest. We broke the cycle of shipping tooling mapped to org charts.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 19. FIGURE - capabilities shipped ═══ -->
+  <figure class="fig">
+    <a href="../images/capacity/product-home.webp"><img src="../images/capacity/product-home.webp"
+         alt="The InfraCloud home page: a greeting and AI search bar, four top actions, the Meta capacity planning timeline, fleet trends and insights showing annual spend by contract, and tables of top budget nodes and top platforms."></a>
+  </figure>
+  <figure class="fig">
+    <a href="../images/capacity/product-screens.webp"><img src="../images/capacity/product-screens.webp"
+         alt="Nine InfraCloud screens showing consistent terminology, visualizations and actionable insights - cost overviews, resource usage trends, budget nodes and the shared planning timeline."></a>
+  </figure>
+
+  <!-- ═══ 20-21. RESULTS ═══ -->
+  <section class="results">
+    <div class="inner">
+      <h2>Results</h2>
+      <p>By architecting a high-performing design team and defining a clear, scalable product vision, my team and I enabled Meta to reliably manage and forecast capacity investments at a global scale. Beyond the software itself, this effort fundamentally shifted the operational culture - successfully establishing Product Design as a core, strategic partner within a historically engineering-first infrastructure organization.</p>
+      <div class="rgrid">
+        <div>
+          <div class="v"><span>0</span><span class="arrow">→</span><span>1</span></div>
+          <div class="l">Shipped in under six months</div>
+        </div>
+        <div>
+          <div class="v">$1B+</div>
+          <div class="l">Operational savings</div>
+        </div>
+        <div>
+          <div class="v">10+ GW</div>
+          <div class="l">Capacity tracked</div>
+        </div>
+        <div>
+          <div class="v"><span>10</span><span class="arrow">→</span><span>25</span></div>
+          <div class="l">Designers on the team</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 23. VOICES - real text, was a cropped raster ═══ -->
+  <section class="voices">
+    <div class="inner-wide">
+      <h2 class="vh">What partners said about the work</h2>
+
+      <!-- The grey glyph avatar from the visual system, defined once and
+           referenced three times rather than pasted three times. Decorative -
+           the attribution underneath carries the meaning. -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <symbol id="glyph" viewBox="0 0 40 40">
+          <clipPath id="glyphclip"><circle cx="20" cy="20" r="20"/></clipPath>
+          <g clip-path="url(#glyphclip)">
+            <circle cx="20" cy="20" r="20" fill="#949494"/>
+            <path d="M20 24.4c7.4 0 13.4 5.6 14.2 12.9H5.8C6.6 30 12.6 24.4 20 24.4z" fill="#211C1A"/>
+            <ellipse cx="20" cy="16.2" rx="6.6" ry="7.4" fill="#EDDED1"/>
+            <path d="M13.4 16.2a6.6 7.4 0 0 1 13.2 0z" fill="#211C1A"/>
+          </g>
+        </symbol>
+      </svg>
+
+      <div class="voicegrid">
+
+        <blockquote class="voice">
+          <p>&ldquo;Your leadership through stakeholder complexity gave research the exact runway to build something delightful&rdquo;</p>
+          <footer>
+            <svg class="glyph" aria-hidden="true"><use href="#glyph"/></svg>
+            <div><span class="who">Senior Designer</span></div>
+          </footer>
+        </blockquote>
+
+        <blockquote class="voice voice--lead">
+          <p>&ldquo;Ramya successfully transformed a deeply complex topic into an intuitive and delightful product. She seamlessly brought cross-functional teams together and guided her team to navigate a difficult domain with emotionally charged stakeholders&rdquo;</p>
+          <footer>
+            <svg class="glyph" aria-hidden="true"><use href="#glyph"/></svg>
+            <div><span class="who">VP, Engineering</span><span class="org">Meta</span></div>
+          </footer>
+        </blockquote>
+
+        <blockquote class="voice">
+          <p>&ldquo;I really appreciated your guidance through such a complex and demanding initiative&rdquo;</p>
+          <footer>
+            <svg class="glyph" aria-hidden="true"><use href="#glyph"/></svg>
+            <div><span class="who">Product Manager</span></div>
+          </footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 24. REFLECTIONS ═══ -->
+  <section class="sect">
+    <div class="measure">
+      <h2>Reflections</h2>
+      <p>Navigating this level of ambiguity reinforced a few core principles that I now rely on to scale design teams and tackle complex ecosystems:</p>
+      <ul class="principles">
+        <li><strong>Have a clear, meaningful vision.</strong> Without a clear, actionable vision tied to business reality, a team is simply a collection of people. Vision must be specific, actionable, and deeply tied to business reality.</li>
+        <li><strong>Be proactive - the “snowplow” mentality.</strong> In ambiguous environments, you cannot wait for the path to clear. You have to snowplow out ahead of your team so they can focus on craft and execution.</li>
+        <li><strong>Establish strong partnerships.</strong> Systems of this scale cannot be built in silos. Tight alignment early on across UXR, Data Science, PM, and Engineering is the only way to maintain momentum.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ═══ 25. NEXT ═══ -->
+  <section class="next">
+    <div class="inner-wide">
+      <a class="nextcard" href="#">
+        <div>
+          <div class="eyebrow">Next case study</div>
+          <h2>The Agentic Pivot</h2>
+          <p>Rebuilding a design team's operating model - and the product itself - for an agent-led future.</p>
+        </div>
+        <span class="go" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══ 26. CONTACT ═══ -->
+  <section class="contact" id="contact">
+    <div class="inner">
+      <h2>Let's build what's <span class="markword">next.<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4,13 C38,6 74,15 108,8 C136,2.5 164,11 196,5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></svg></span></h2>
+      <p>I'm always open to discussing AI-first product strategy, scaling design orgs, and the future of design.</p>
+      <a href="#" class="btn-on-dark">Email me</a><a href="#" class="btn-on-dark">LinkedIn</a>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="pagefoot"><div class="inner">
+    <span>© 2026 Ramya Ramaswamy</span>
+    <span><a href="#">Work</a><a href="#">Philosophy</a><a href="#">LinkedIn</a><a href="#">Email</a></span>
+  </div></footer>
+
+</div>
+</div>
+
+<script>
+  // Nav toggle - identical to home-v16. aria-expanded is the state; the CSS
+  // reads it too, so there is no separate class to keep in step.
+  (function () {
+    var btn  = document.querySelector('.navtoggle');
+    var menu = document.getElementById('navmenu');
+    if (!btn || !menu) return;
+
+    var isOpen = function () { return btn.getAttribute('aria-expanded') === 'true'; };
+    var setOpen = function (open) { btn.setAttribute('aria-expanded', open ? 'true' : 'false'); };
+
+    btn.addEventListener('click', function () { setOpen(!isOpen()); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && isOpen()) { setOpen(false); btn.focus(); }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (isOpen() && !menu.contains(e.target) && !btn.contains(e.target)) setOpen(false);
+    });
+
+    menu.addEventListener('click', function (e) {
+      if (e.target.closest('a')) setOpen(false);
+    });
+  })();
+</script>
+
+</body>
+</html>
